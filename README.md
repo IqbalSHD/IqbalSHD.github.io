@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,11 +14,12 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            /* Or a solid color: background-color: #f4f7f6; */
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh; /* Ensure body takes full viewport height */
+            flex-direction: column; /* Stack elements vertically */
+            justify-content: center; /* Center vertically */
+            align-items: center;    /* Center horizontally */
+            min-height: 100vh;      /* Ensure body takes full viewport height */
+            padding: 20px;          /* Add some padding around the content */
         }
 
         .login-container {
@@ -30,6 +30,7 @@
             width: 100%;
             max-width: 400px; /* Max width for the form */
             text-align: center;
+            margin-bottom: 30px; /* Add space below the login container */
         }
 
         .login-container h2 {
@@ -40,12 +41,12 @@
 
         .input-group {
             margin-bottom: 20px;
-            text-align: left; /* Align labels to the left */
-            position: relative; /* Needed for potential icon positioning */
+            text-align: left;
+            position: relative;
         }
 
         .input-group label {
-            display: block; /* Label on its own line */
+            display: block;
             margin-bottom: 8px;
             color: #555;
             font-weight: 500;
@@ -54,7 +55,7 @@
 
         .input-group input {
             width: 100%;
-            padding: 12px 15px; /* Comfortable padding */
+            padding: 12px 15px;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 1rem;
@@ -67,9 +68,9 @@
         }
 
         .input-group input:focus {
-            outline: none; /* Remove default focus outline */
-            border-color: #764ba2; /* Highlight color on focus */
-            box-shadow: 0 0 8px rgba(118, 75, 162, 0.2); /* Subtle glow on focus */
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 8px rgba(118, 75, 162, 0.2);
         }
 
         .login-button {
@@ -83,15 +84,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: opacity 0.3s ease, transform 0.2s ease;
-            margin-top: 10px; /* Space above button */
+            margin-top: 10px;
         }
 
         .login-button:hover {
-            opacity: 0.9; /* Slightly transparent on hover */
+            opacity: 0.9;
         }
-        
+
         .login-button:active {
-            transform: scale(0.98); /* Slight shrink effect on click */
+            transform: scale(0.98);
         }
 
         .options {
@@ -111,14 +112,33 @@
             text-decoration: underline;
         }
 
+        /* Style for the new navigation button */
+        .nav-button {
+            display: inline-block; /* Allows padding and margin */
+            padding: 10px 25px;
+            background-color: #ffffff; /* White background */
+            color: #764ba2; /* Purple text */
+            border: 2px solid #764ba2; /* Purple border */
+            border-radius: 6px;
+            text-decoration: none; /* Remove underline from link */
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background-color: #f0eafa; /* Light purple on hover */
+            color: #667eea; /* Lighter purple text on hover */
+        }
+
     </style>
 </head>
 <body>
 
     <div class="login-container">
         <h2>Login</h2>
-        <!-- The form element is semantically correct, but action/method would depend on backend -->
-        <form action="main.html" method="post"> <!-- Replace # with your backend endpoint -->
+        <form action="#" method="post"> <!-- Replace # with your backend endpoint -->
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" placeholder="Enter your username" required>
@@ -137,7 +157,10 @@
                 <a href="#">Sign Up</a>
             </div>
         </form>
-    </div>
+    </div> <!-- End of login-container -->
+
+    <!-- New button linking to secondpage.html -->
+    <a href="secondpage.html" class="nav-button">Go to Second Page</a>
 
 </body>
 </html>
