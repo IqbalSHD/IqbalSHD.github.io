@@ -118,7 +118,7 @@
     <div class="login-container">
         <h2>Login</h2>
         <!-- The form element is semantically correct, but action/method would depend on backend -->
-        <form action="#" method="post"> <!-- Replace # with your backend endpoint -->
+        <form action="main.html" method="post"> <!-- Replace # with your backend endpoint -->
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" placeholder="Enter your username" required>
