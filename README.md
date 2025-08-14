@@ -1,166 +1,52 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <style>
-        /* Basic Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+# Muhammad Iqbal Bin Suhaidin — Portfolio
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            flex-direction: column; /* Stack elements vertically */
-            justify-content: center; /* Center vertically */
-            align-items: center;    /* Center horizontally */
-            min-height: 100vh;      /* Ensure body takes full viewport height */
-            padding: 20px;          /* Add some padding around the content */
-        }
+This repository hosts my personal portfolio site on GitHub Pages.
 
-        .login-container {
-            background-color: #ffffff;
-            padding: 40px 50px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px; /* Max width for the form */
-            text-align: center;
-            margin-bottom: 30px; /* Add space below the login container */
-        }
+- Live site: https://iqbalshd.github.io/
+- Landing page: `index.html` (button to enter the portfolio)
+- Main portfolio: `main.html` (About, Education, Experience, Skills, Projects, Awards, Contact)
 
-        .login-container h2 {
-            color: #333;
-            margin-bottom: 30px;
-            font-weight: 600;
-        }
+## What’s inside
 
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-            position: relative;
-        }
+- `index.html` — Minimal landing page with a big centered button linking to `main.html`.
+- `main.html` — Responsive single‑page portfolio with sections and smooth scrolling.
+- `.nojekyll` — Ensures GitHub Pages serves files as plain static assets.
 
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.95em;
-        }
+## Preview locally
 
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            color: #333;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
+- Double‑click `index.html` or `main.html` to open in your browser.
+- Or use a simple static server (e.g., VS Code Live Server) if you prefer.
 
-        .input-group input::placeholder {
-            color: #aaa;
-        }
+## Customize
 
-        .input-group input:focus {
-            outline: none;
-            border-color: #764ba2;
-            box-shadow: 0 0 8px rgba(118, 75, 162, 0.2);
-        }
+Edit `main.html` to update your details:
+- Hero: name, role, profile image URL.
+- About: short bio and highlight skills.
+- Education and Work Experience: update items and dates.
+- Skills: languages, tools, frameworks.
+- Projects: titles, descriptions, and screenshots (image URLs).
+- Awards and Contact: images and contact info.
 
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.3s ease, transform 0.2s ease;
-            margin-top: 10px;
-        }
+Design tweaks:
+- Colors and spacing are defined in CSS custom properties at the top of `main.html`.
+- Update images by pointing to your own hosted images or add them to this repo and reference relatively.
 
-        .login-button:hover {
-            opacity: 0.9;
-        }
+## Deploy
 
-        .login-button:active {
-            transform: scale(0.98);
-        }
+This site is served by GitHub Pages from the `main` branch root:
+- Push commits to `main` to auto‑deploy.
+- Allow a few minutes for the CDN cache to refresh. If you don’t see changes, hard refresh (Ctrl+F5).
 
-        .options {
-            margin-top: 25px;
-            font-size: 0.9em;
-        }
+## Project status
 
-        .options a {
-            color: #667eea;
-            text-decoration: none;
-            margin: 0 10px;
-            transition: color 0.3s ease;
-        }
+Active. I update content and screenshots as new projects are completed.
 
-        .options a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
+## Contact
 
-        /* Style for the new navigation button */
-        .nav-button {
-            display: inline-block; /* Allows padding and margin */
-            padding: 10px 25px;
-            background-color: #ffffff; /* White background */
-            color: #764ba2; /* Purple text */
-            border: 2px solid #764ba2; /* Purple border */
-            border-radius: 6px;
-            text-decoration: none; /* Remove underline from link */
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+- Email: iqbal22shd@gmail.com
+- LinkedIn: https://my.linkedin.com/in/iqbal-suhaidin-560a452a8
+- GitHub: https://github.com/IqbalSHD
 
-        .nav-button:hover {
-            background-color: #f0eafa; /* Light purple on hover */
-            color: #667eea; /* Lighter purple text on hover */
-        }
+## License
 
-    </style>
-</head>
-<body>
-
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="#" method="post"> <!-- Replace # with your backend endpoint -->
-            <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
-            </div>
-
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            </div>
-
-            <button type="submit" class="login-button">Login</button>
-
-            <div class="options">
-                <a href="#">Forgot Password?</a>
-                <span>|</span>
-                <a href="#">Sign Up</a>
-            </div>
-        </form>
-    </div> <!-- End of login-container -->
-
-    <!-- New button linking to secondpage.html -->
-    <a href="secondpage.html" class="nav-button">Go to Second Page</a>
-
-</body>
-</html>
+No license specified. All rights reserved unless otherwise noted.
