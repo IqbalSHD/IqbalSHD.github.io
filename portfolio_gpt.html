@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Portfolio — Muhammad Iqbal Bin Suhaidin</title>
+	<meta name="description" content="Portfolio of Muhammad Iqbal Bin Suhaidin — Backend & Full‑Stack Developer skilled in PHP, MySQL, Python, C#, and modern web." />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg: #0b0f19;
+			--panel: #0f172a;
+			--soft: #1f2937;
+			--text: #e5e7eb;
+			--muted: #94a3b8;
+			--brand: #7c3aed;
+			--brand2: #22d3ee;
+			--accent: #6366f1;
+			--border: rgba(255,255,255,.08);
+			--max: 1150px;
+		}
+		* { box-sizing: border-box; }
+		html, body { margin: 0; padding: 0; }
+		body {
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			background:
+				radial-gradient(1100px 550px at 10% -10%, rgba(124,58,237,.25), transparent 50%),
+				radial-gradient(1000px 500px at 100% 0%, rgba(99,102,241,.22), transparent 50%),
+				var(--bg);
+			color: var(--text);
+			line-height: 1.6;
+		}
+		a { color: var(--brand2); text-decoration: none; }
+		a:hover { text-decoration: underline; }
+		.container { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+
+		/* Header */
+		header { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(8px) saturate(140%); background: rgba(11,15,25,.65); border-bottom: 1px solid var(--border); }
+		.nav { display: flex; align-items: center; gap: 20px; height: 64px; }
+		.brand { font-weight: 800; letter-spacing: .4px; }
+		.spacer { flex: 1; }
+		nav a { color: var(--muted); font-weight: 600; }
+		nav a:hover { color: #fff; }
+
+		/* Hero */
+		.hero { padding: 56px 0 24px; }
+		.hero-inner { display: grid; grid-template-columns: 128px 1fr; gap: 22px; align-items: center; }
+		.avatar { width: 128px; height: 128px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+		.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+		.title { margin: 0; font-size: 2rem; line-height: 1.25; }
+		.subtitle { color: var(--muted); margin-top: 6px; }
+		.chips { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+		.chip { background: var(--soft); color: #e5e7eb; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+		.chip:hover { background: #263142; text-decoration: none; }
+
+		/* Sections */
+		section { padding: 30px 0; border-top: 1px solid var(--border); }
+		h2 { font-size: 1.3rem; margin: 0 0 16px; }
+		.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+		.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+		.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+		.muted { color: var(--muted); }
+		ul { padding-left: 18px; margin: 10px 0; }
+		li { margin: 6px 0; }
+		.tags .tag { display: inline-block; margin: 0 6px 6px 0; padding: 4px 10px; background: #1c2534; color: #cbd5e1; border: 1px solid var(--border); border-radius: 999px; font-size: .9rem; }
+		.media { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 10px; }
+		.media img, .project img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); cursor: zoom-in; }
+		.projects { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+		.project h3 { margin: 8px 0; font-size: 1.05rem; }
+
+		/* Lightbox */
+		.lightbox { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.86); z-index: 1000; padding: 24px; }
+		.lightbox.open { display: flex; }
+		.lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+		.lightbox .close { position: absolute; top: 16px; right: 16px; padding: 8px 12px; background: rgba(255,255,255,.12); color: white; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; font-weight: 800; cursor: pointer; }
+
+		/* Footer */
+		footer { text-align: center; color: var(--muted); padding: 28px 0 40px; }
+
+		/* Responsive */
+		@media (max-width: 900px) {
+			.hero-inner { grid-template-columns: 1fr; text-align: center; }
+			.avatar { margin: 0 auto; }
+			.grid-2, .projects { grid-template-columns: 1fr; }
+			.media { grid-template-columns: repeat(2, minmax(0,1fr)); }
+		}
+	</style>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			// Smooth scroll
+			document.querySelectorAll('a[href^="#"]').forEach(a => {
+				a.addEventListener('click', e => {
+					const id = a.getAttribute('href');
+					const el = document.querySelector(id);
+					if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+				});
+			});
+
+			// Lightbox
+			const lb = document.getElementById('lightbox');
+			const lbImg = lb.querySelector('img');
+			const lbClose = lb.querySelector('.close');
+			function openLB(src, alt) {
+				lbImg.src = src; lbImg.alt = alt || ''; lb.classList.add('open'); document.body.style.overflow = 'hidden';
+			}
+			function closeLB() {
+				lb.classList.remove('open'); lbImg.removeAttribute('src'); document.body.style.overflow = '';
+			}
+			document.addEventListener('click', (e) => {
+				const t = e.target;
+				if (t && (t.matches('.media img') || t.matches('.project img'))) {
+					const full = t.getAttribute('data-full') || t.currentSrc || t.src;
+					openLB(full, t.alt);
+				}
+			});
+			lb.addEventListener('click', (e) => { if (e.target === lb) closeLB(); });
+			lbClose.addEventListener('click', closeLB);
+			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLB(); });
+			document.getElementById('y').textContent = new Date().getFullYear();
+		});
+	</script>
+</head>
+<body>
+	<header>
+		<div class="container nav">
+			<div class="brand">MUHAMMAD IQBAL BIN SUHAIDIN</div>
+			<div class="spacer"></div>
+			<nav aria-label="Primary">
+				<a href="#about">About</a>
+				<a href="#education">Education</a>
+				<a href="#experience">Experience</a>
+				<a href="#skills">Skills</a>
+				<a href="#projects">Projects</a>
+				<a href="#awards">Awards</a>
+				<a href="#contact">Contact</a>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<!-- Hero -->
+		<div class="container hero">
+			<div class="hero-inner">
+				<div class="avatar">
+					<img src="https://iqbalshd.github.io/Portfolio/github/g7%20low.jpg" alt="Muhammad Iqbal Bin Suhaidin" loading="lazy" />
+				</div>
+				<div>
+					<h1 class="title">Backend & Full‑Stack Developer</h1>
+					<p class="subtitle">Building practical web apps with PHP, MySQL, Python, C#, and modern web. Strong focus on robust backends, clean UI, and data‑driven features.</p>
+					<div class="chips">
+						<a class="chip" href="https://my.linkedin.com/in/iqbal-suhaidin-560a452a8" target="_blank" rel="noopener">LinkedIn</a>
+						<a class="chip" href="https://github.com/IqbalSHD" target="_blank" rel="noopener">GitHub</a>
+						<a class="chip" href="#contact">Get in touch</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- About -->
+		<section id="about">
+			<div class="container grid-2">
+				<div class="card">
+					<h2>About</h2>
+					<p>
+						Computer Science graduate passionate about backend and full‑stack development, with hands‑on experience building real‑world web apps. Skilled in backend services, database design, web design, and applied ML. Collaborative problem‑solver focused on scalable, maintainable solutions.
+					</p>
+					<div class="tags" style="margin-top:10px;">
+						<span class="tag">PHP</span>
+						<span class="tag">MySQL</span>
+						<span class="tag">Python</span>
+						<span class="tag">C#</span>
+						<span class="tag">HTML/CSS</span>
+						<span class="tag">JavaScript</span>
+					</div>
+				</div>
+				<div class="card">
+					<h2>Highlights</h2>
+					<ul>
+						<li>Property Management System with history tracking and role‑based access.</li>
+						<li>WordPress sites incl. Amanilife (e‑commerce) and Kulim Golf & Country Resort.</li>
+						<li>ML apps: Heart disease prediction, loan repayment prediction.</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<!-- Education -->
+		<section id="education">
+			<div class="container">
+				<h2>Education</h2>
+				<div class="grid-2">
+					<div class="card">
+						<strong>Bachelor of Computer Science (Honours)</strong>
+						<div class="muted">Universiti Teknologi MARA (UiTM), Kuala Terengganu</div>
+						<div class="muted">Oct 2021 – Jun 2024 · Second Class (Upper) · CGPA 3.0</div>
+					</div>
+					<div class="card">
+						<strong>Diploma in Computer Science</strong>
+						<div class="muted">Universiti Teknologi MARA (UiTM), Sungai Petani, Kedah</div>
+						<div class="muted">Jun 2018 – Aug 2021</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Experience -->
+		<section id="experience">
+			<div class="container">
+				<h2>Work Experience</h2>
+				<div class="card">
+					<strong>Backend Developer — Menang Idaman SDN BHD</strong>
+					<div class="muted">Feb 2025 – Present</div>
+					<p>Designed and developed a responsive, web‑based Property Management System using PHP and MySQL (phpMyAdmin), hosted on cPanel.</p>
+					<ul>
+						<li>Custom DB for Sales & Purchase (S&P) and Rental properties.</li>
+						<li>Uploads with type validation and 50MB limits; clear validation and success messages.</li>
+						<li>Dashboard with tabbed views; full CRUD for properties, images, and documents.</li>
+						<li>History tracking: who created, uploaded/deleted files, and edited info.</li>
+						<li>Tenant history for rentals; expiration monitoring for leases.</li>
+						<li>Role‑based access (Admin vs Staff); mobile‑friendly UI.</li>
+						<li>Filter by category/type and export to Excel/PDF.</li>
+					</ul>
+					<div class="media">
+						<img src="https://iqbalshd.github.io/Portfolio/github/dashboard.png" alt="Dashboard" loading="lazy" />
+						<img src="https://iqbalshd.github.io/Portfolio/github/house.png" alt="Property form" loading="lazy" />
+						<img src="https://iqbalshd.github.io/Portfolio/github/expiration.png" alt="Expiration monitoring" loading="lazy" />
+					</div>
+				</div>
+
+				<div class="card" style="margin-top:14px;">
+					<strong>Web Designer & Postmaster Admin — Ministry of Health HQ, Putrajaya</strong>
+					<div class="muted">Sep 2024 – Dec 2024</div>
+					<ul>
+						<li>Redesigned legacy websites with modern layouts and UX.</li>
+						<li>Managed Postmaster for critical email blasts to agencies and institutions.</li>
+					</ul>
+				</div>
+
+				<div class="card" style="margin-top:14px;">
+					<strong>IT Support & Web Developer Intern — Kulim Technology Park Corporation</strong>
+					<div class="muted">Mar 2024 – Jun 2024</div>
+					<ul>
+						<li>Built WordPress for Kulim Golf & Country Resort — <a href="https://www2.kulimgolf.com.my/" target="_blank" rel="noopener">visit</a>.</li>
+						<li>Upgraded e‑procurement to a new C# .NET version.</li>
+						<li>IT support: setup, installation, reset, troubleshooting.</li>
+						<li>Events: KIDEC 2024 exhibitor; STEM4FUN; Peneraju Tunas BRIDGE Bestari.</li>
+					</ul>
+				</div>
+
+				<div class="card" style="margin-top:14px;">
+					<strong>Software Developer Intern — Pejabat Daerah & Tanah, Alor Setar</strong>
+					<div class="muted">Oct 2020 – Dec 2020</div>
+					<ul>
+						<li>Java (NetBeans) asset management system (Sistem Penyimpanan Barang).</li>
+						<li>Admin auth; monthly/yearly asset valuation; CRUD and search.</li>
+						<li>XAMPP + MySQL; created posters and a corporate video.</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<!-- Skills -->
+		<section id="skills">
+			<div class="container">
+				<h2>Skills</h2>
+				<div class="grid-2">
+					<div class="card">
+						<img src="https://iqbalshd.github.io/Portfolio/github/skill.png" alt="Skills overview" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--border)" loading="lazy" />
+					</div>
+					<div class="card">
+						<strong>Technical</strong>
+						<ul>
+							<li>Languages: Python, Java, C++, C#, PHP, SQL, HTML, CSS</li>
+							<li>Tools: Visual Studio, VS Code, Laragon, XAMPP, SSMS, GitHub</li>
+							<li>ML: Random Forest, Decision Tree, KNN, SVC</li>
+						</ul>
+						<strong>Languages</strong>
+						<ul>
+							<li>Bahasa Melayu, English</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Projects -->
+		<section id="projects">
+			<div class="container">
+				<h2>Projects</h2>
+				<div class="projects">
+					<div class="card project">
+						<img src="https://iqbalshd.github.io/Portfolio/github/rf.jpg" alt="Heart disease prediction app" loading="lazy" />
+						<h3>Heart Disease Prediction (Random Forest)</h3>
+						<ul>
+							<li>Python app with custom Random Forest; Streamlit GUI for 13 clinical inputs.</li>
+							<li>Additional analysis with KNN and SVC; clear binary interpretation.</li>
+						</ul>
+					</div>
+
+					<div class="card project">
+						<img src="https://iqbalshd.github.io/Portfolio/github/Screenshot%202023-01-24%20104710.png" alt="Animal Recognition in MATLAB" loading="lazy" />
+						<h3>Animal Recognition (CNN)</h3>
+						<ul>
+							<li>MATLAB with image processing + CNN; browse image, preview, classify.</li>
+						</ul>
+					</div>
+
+					<div class="card project">
+						<img src="https://iqbalshd.github.io/Portfolio/github/rbs1.jpg" alt="Online Ordering System" loading="lazy" />
+						<h3>Online Ordering System (Web)</h3>
+						<ul>
+							<li>HTML/CSS/PHP with MySQL; user registration/login, cart, admin order management.</li>
+						</ul>
+						<div class="media">
+							<img src="https://iqbalshd.github.io/Portfolio/github/rbs2.png" alt="Ordering flow 2" loading="lazy" />
+							<img src="https://iqbalshd.github.io/Portfolio/github/rbs3.png" alt="Ordering flow 3" loading="lazy" />
+						</div>
+					</div>
+
+					<div class="card project">
+						<img src="https://iqbalshd.github.io/Portfolio/github/loan%20prediction.png" alt="Loan prediction GUI" loading="lazy" />
+						<h3>Loan Repayment Prediction</h3>
+						<ul>
+							<li>Python app & GUI; preprocessing (encode, clean, standardize), correlation analysis.</li>
+							<li>Downsampled imbalance; train/test/eval split and reporting.</li>
+						</ul>
+					</div>
+
+					<div class="card project">
+						<img src="https://iqbalshd.github.io/Portfolio/github/c%20crud.png" alt="C# mini CRUD project" loading="lazy" />
+						<h3>Mini Project — Client Management (C#)</h3>
+						<ul>
+							<li>CRUD app in C# with SQL Server (SSMS); demonstrates full data lifecycle.</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Awards -->
+		<section id="awards">
+			<div class="container">
+				<h2>Awards</h2>
+				<div class="card">
+					<strong>Heart Disease Prediction — Silver Award</strong>
+					<div class="media" style="grid-template-columns: 1fr;">
+						<img src="https://iqbalshd.github.io/Portfolio/github/award%20silver.jpg" alt="Silver award certificate" loading="lazy" />
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Contact -->
+		<section id="contact">
+			<div class="container grid-2">
+				<div class="card">
+					<h2>Contact</h2>
+					<ul>
+						<li><strong>Address:</strong> Seri Kembangan 43300, Selangor</li>
+						<li><strong>Mobile:</strong> <a href="tel:+60196356149">+60 19‑635 6149</a></li>
+						<li><strong>Email:</strong> <a href="mailto:iqbal22shd@gmail.com">iqbal22shd@gmail.com</a></li>
+						<li><strong>License:</strong> Motorcycle and car</li>
+					</ul>
+				</div>
+				<div class="card">
+					<h2>Links</h2>
+					<ul>
+						<li><a href="https://my.linkedin.com/in/iqbal-suhaidin-560a452a8" target="_blank" rel="noopener">LinkedIn</a></li>
+						<li><a href="https://github.com/IqbalSHD" target="_blank" rel="noopener">GitHub</a></li>
+						<li><a href="https://amanilife.my/" target="_blank" rel="noopener">Amanilife — e‑commerce (WordPress)</a></li>
+						<li><a href="https://www2.kulimgolf.com.my/" target="_blank" rel="noopener">Kulim Golf & Country Resort</a></li>
+					</ul>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<!-- Lightbox overlay -->
+	<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image preview">
+		<button class="close" type="button" aria-label="Close preview">Close</button>
+		<img alt="" />
+	</div>
+
+	<footer>
+		<div class="container">© <span id="y"></span> Muhammad Iqbal Bin Suhaidin · GitHub Pages</div>
+	</footer>
+</body>
+</html>

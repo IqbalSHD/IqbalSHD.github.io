@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muhammad Iqbal Bin Suhaidin - Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #16213e;
+            --primary-color: #0f3460;
+            --accent-color: #e94560;
+            --text-color: #e0e0e0;
+            --header-text-color: #ffffff;
+            --muted-text-color: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(22, 33, 62, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--header-text-color);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .hero-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-color);
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--header-text-color);
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            color: var(--muted-text-color);
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 80px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: var(--header-text-color);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Card Styling */
+        .card {
+            background: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            gap: 25px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        /* Experience & Education */
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            border-left: 2px solid var(--primary-color);
+        }
+        
+        .timeline-item:not(:last-child) {
+            padding-bottom: 40px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+        }
+
+        .timeline-item h3 {
+            font-size: 1.2rem;
+            color: var(--header-text-color);
+        }
+        .timeline-item .company, .timeline-item .institution {
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .timeline-item .date {
+            color: var(--muted-text-color);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        /* Skills */
+        .skill-card {
+            text-align: center;
+        }
+        .skill-card i {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        .skill-card h3 {
+            color: var(--header-text-color);
+            font-size: 1.1rem;
+        }
+
+        /* Projects */
+        .project-card h3 {
+            color: var(--header-text-color);
+            margin-bottom: 10px;
+        }
+
+        /* Contact */
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        .contact-item a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .contact-item a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--muted-text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="nav-brand">IqbalSHD</a>
+            <ul class="nav-menu">
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#experience" class="nav-link">Experience</a></li>
+                <li><a href="#projects" class="nav-link">Projects</a></li>
+                <li><a href="#skills" class="nav-link">Skills</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <img src="https://iqbalshd.github.io/Portfolio/github/g7%20low.jpg" alt="Muhammad Iqbal Bin Suhaidin" class="hero-avatar">
+        <h1>Muhammad Iqbal Bin Suhaidin</h1>
+        <p>Backend & Full-Stack Developer passionate about building scalable web applications and elegant user experiences.</p>
+    </header>
+
+    <main class="container">
+        <section id="about" class="section">
+            <h2 class="section-title">About Me</h2>
+            <div class="card">
+                <p>
+                    I am a Computer Science graduate with a strong passion for backend and full-stack development. My experience includes building robust web applications, managing databases, and designing user-friendly interfaces. I thrive on solving complex problems and am proficient in technologies like PHP, MySQL, Python, and C#. I am dedicated to creating solutions that are not only functional but also scalable and maintainable for the long term.
+                </p>
+            </div>
+        </section>
+
+        <section id="experience" class="section">
+            <h2 class="section-title">Work Experience</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>Backend Developer</h3>
+                    <p class="company">Menang Idaman SDN BHD</p>
+                    <p class="date">Feb 2025 – Present</p>
+                    <p>Designed and developed a responsive, web-based Property Management System using PHP and phpMyAdmin. Key features include custom database management, file upload validation, CRUD functionality, history tracking, and role-based access control.</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>Web Designer and Postmaster Admin</h3>
+                    <p class="company">Ministry of Health headquarters, Putrajaya</p>
+                    <p class="date">Sep 2024 – Dec 2024</p>
+                    <p>Designed and developed new website layouts and managed the Postmaster system for email distribution.</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>IT Support & Web Developer Intern</h3>
+                    <p class="company">Kulim Technology Park Corporation SDN BHD</p>
+                    <p class="date">Mar 2024 – Jun 2024</p>
+                    <p>Developed a WordPress website, updated an e-procurement site to C# .NET, and provided IT support.</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>Software Developer Intern</h3>
+                    <p class="company">Pejabat Daerah & Tanah, Alor Setar</p>
+                    <p class="date">Oct 2020 – Dec 2020</p>
+                    <p>Developed an office asset management system using Java and MySQL, implementing CRUD operations and search functionality.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="education" class="section">
+            <h2 class="section-title">Education</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>Bachelor of Computer Science (Honours)</h3>
+                    <p class="institution">Universiti Teknologi MARA, Kuala Terengganu</p>
+                    <p class="date">Oct 2021 – Jun 2024 | CGPA: 3.0</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>Diploma in Computer Science</h3>
+                    <p class="institution">Universiti Teknologi MARA, Kedah</p>
+                    <p class="date">Jun 2018 – Aug 2021</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="section">
+            <h2 class="section-title">My Projects</h2>
+            <div class="grid grid-2">
+                <div class="card project-card">
+                    <h3>Heart Disease Prediction</h3>
+                    <p>Developed a prediction system in Python with a Streamlit GUI. Implemented Random Forest, KNN, and SVC algorithms. Awarded a Silver Medal for this project.</p>
+                </div>
+                <div class="card project-card">
+                    <h3>Animal Recognition Using CNN</h3>
+                    <p>Built an animal recognition program in MATLAB using a Convolutional Neural Network (CNN) and image processing techniques.</p>
+                </div>
+                <div class="card project-card">
+                    <h3>Online Ordering System</h3>
+                    <p>Created a web-based ordering system using HTML, CSS, and PHP with a MySQL database. Included customer and admin functionalities.</p>
+                </div>
+                <div class="card project-card">
+                    <h3>Loan Prediction System</h3>
+                    <p>Developed a loan repayment prediction system in Python, including data preprocessing, exploratory data analysis, and model building.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="section">
+            <h2 class="section-title">Core Skills</h2>
+            <div class="grid grid-3">
+                <div class="card skill-card">
+                    <i class="ri-code-s-slash-line"></i>
+                    <h3>Languages</h3>
+                    <p>Python, Java, C#, PHP, SQL, HTML, CSS</p>
+                </div>
+                <div class="card skill-card">
+                    <i class="ri-tools-line"></i>
+                    <h3>Tools & Software</h3>
+                    <p>VS Code, Visual Studio, GitHub, Laragon, XAMPP, SSMS</p>
+                </div>
+                <div class="card skill-card">
+                    <i class="ri-robot-2-line"></i>
+                    <h3>Machine Learning</h3>
+                    <p>Random Forest, Decision Tree, KNN, SVC</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="card">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="ri-mail-send-line"></i>
+                        <a href="mailto:iqbal22shd@gmail.com">iqbal22shd@gmail.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="ri-phone-line"></i>
+                        <span>+6019-6356149</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="ri-linkedin-box-fill"></i>
+                        <a href="https://my.linkedin.com/in/iqbal-suhaidin-560a452a8" target="_blank">linkedin.com/in/iqbal-suhaidin</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="ri-github-fill"></i>
+                        <a href="https://github.com/IqbalSHD" target="_blank">github.com/IqbalSHD</a>
+                    </div>
+                     <div class="contact-item">
+                        <i class="ri-map-pin-line"></i>
+                        <span>Seri Kembangan 43300, Selangor</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Muhammad Iqbal Bin Suhaidin. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.section');
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
