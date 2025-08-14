@@ -73,18 +73,26 @@
 
         /* Media */
         .media { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin-top: 10px; }
-        .media img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .media img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    /* Zoom cursor */
+    .media img, .project img { cursor: zoom-in; }
 
         /* Projects */
         .projects { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
-        .project img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px; }
+        .project img { width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px; }
         .project h3 { margin: 0 0 6px; font-size: 1.05rem; }
 
         /* Footer */
         footer { text-align: center; padding: 28px 0 40px; color: var(--muted); }
 
+    /* Lightbox */
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    .lightbox .close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
+
         /* Responsive */
-        @media (max-width: 9000px) {
+        @media (max-width: 900px) {
             .hero-inner { grid-template-columns: 1fr; text-align: center; }
             .avatar { margin: 0 auto; }
             .grid-2, .projects { grid-template-columns: 1fr; }
@@ -100,6 +108,47 @@
                     const el = document.querySelector(id);
                     if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
                 });
+            });
+
+            // Lightbox logic
+            const lb = document.getElementById('lightbox');
+            const lbImg = lb ? lb.querySelector('img') : null;
+            const lbClose = lb ? lb.querySelector('.close') : null;
+
+            function openLightbox(src, alt) {
+                if (!lb || !lbImg) return;
+                lbImg.src = src;
+                lbImg.alt = alt || '';
+                lb.classList.add('open');
+                lb.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeLightbox() {
+                if (!lb || !lbImg) return;
+                lb.classList.remove('open');
+                lb.setAttribute('aria-hidden', 'true');
+                lbImg.removeAttribute('src');
+                document.body.style.overflow = '';
+            }
+
+            // Open on image click in galleries and projects
+            document.addEventListener('click', (e) => {
+                const t = e.target;
+                if (t && (t.matches('.media img') || t.matches('.project img'))) {
+                    const full = t.getAttribute('data-full') || t.currentSrc || t.src;
+                    openLightbox(full, t.alt);
+                }
+            });
+
+            // Close handlers
+            if (lb) {
+                lb.addEventListener('click', (e) => {
+                    if (e.target === lb) closeLightbox();
+                });
+                if (lbClose) lbClose.addEventListener('click', closeLightbox);
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeLightbox();
             });
         });
     </script>
@@ -357,6 +406,12 @@
             </div>
         </section>
     </main>
+
+    <!-- Lightbox overlay -->
+    <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Image preview">
+        <button class="close" type="button" aria-label="Close preview">Close</button>
+        <img alt="" />
+    </div>
 
     <footer>
         <div class="container">© <span id="y"></span> Muhammad Iqbal Bin Suhaidin · Hosted on GitHub Pages</div>
