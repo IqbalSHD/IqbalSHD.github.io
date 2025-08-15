@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok's Infinite Realm - The Ultimate Web Adventure</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #111;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 800px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        #canvas {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+        }
+        #health-bar {
+            background: #222;
+            border: 1px solid #fff;
+            width: 200px;
+            height: 20px;
+            position: relative;
+        }
+        #health-fill {
+            background: linear-gradient(to right, #f00, #0f0);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        #mana-bar {
+            background: #222;
+            border: 1px solid #fff;
+            width: 200px;
+            height: 20px;
+            position: relative;
+            margin-left: 10px;
+        }
+        #mana-fill {
+            background: linear-gradient(to right, #00f, #0ff);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        #inventory {
+            display: flex;
+            gap: 5px;
+        }
+        .inv-item {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border: 1px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: transform 0.2s;
+        }
+        .inv-item:hover {
+            transform: scale(1.1);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+            touch-action: manipulation;
+        }
+        .control-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            pointer-events: auto;
+        }
+        #menu button {
+            margin: 10px;
+            padding: 10px 20px;
+            background: #444;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #menu button:hover {
+            background: #666;
+        }
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        @media (max-width: 768px) {
+            #controls {
+                display: flex;
+                bottom: 10px;
+            }
+            #hud {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #stats {
+                display: flex;
+                gap: 10px;
+            }
+            #menu {
+                width: 90%;
+                max-width: 400px;
+            }
+            #game-container {
+                border-radius: 0;
+                border: none;
+                max-width: 100%;
+                max-height: 100%;
+            }
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="canvas"></canvas>
+        <div id="ui-overlay">
+            <div id="hud">
+                <div id="stats">
+                    <div id="health-bar"><div id="health-fill"></div></div>
+                    <div id="mana-bar"><div id="mana-fill"></div></div>
+                </div>
+                <div id="inventory"></div>
+            </div>
+            <div id="controls">
+                <div class="control-btn" id="up">↑</div>
+                <div class="control-btn" id="left">←</div>
+                <div class="control-btn" id="down">↓</div>
+                <div class="control-btn" id="right">→</div>
+                <div class="control-btn" id="attack">⚔</div>
+                <div class="control-btn" id="spell">✨</div>
+            </div>
+            <div id="menu">
+                <h2>Grok's Infinite Realm</h2>
+                <p>The ultimate procedural adventure. Explore, fight, craft, survive.</p>
+                <button id="start">Start Game</button>
+                <button id="load">Load Save</button>
+                <button id="settings">Settings</button>
+            </div>
+        </div>
+        <canvas id="particles"></canvas>
+    </div>
+    <script>
+        // Grok's Infinite Realm - Advanced Web Game by Grok 4
+        // Features: Procedural generation, A* pathfinding AI, physics-based movement, inventory/crafting, spells, particles, audio, save/load, responsive UI/UX
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const particlesCanvas = document.getElementById('particles');
+        const particlesCtx = particlesCanvas.getContext('2d');
+        const healthFill = document.getElementById('health-fill');
+        const manaFill = document.getElementById('mana-fill');
+        const inventoryDiv = document.getElementById('inventory');
+        const menu = document.getElementById('menu');
+        const startBtn = document.getElementById('start');
+        const loadBtn = document.getElementById('load');
+        const settingsBtn = document.getElementById('settings');
+        const gameContainer = document.getElementById('game-container');
+        const controls = {
+            up: document.getElementById('up'),
+            left: document.getElementById('left'),
+            down: document.getElementById('down'),
+            right: document.getElementById('right'),
+            attack: document.getElementById('attack'),
+            spell: document.getElementById('spell')
+        };
+
+        // Game Constants
+        const TILE_SIZE = 32;
+        const MAP_SIZE = 50; // Procedural map size
+        const PLAYER_SPEED = 0.1;
+        const ENEMY_TYPES = [
+            {name: 'Goblin', hp: 50, dmg: 10, color: '#0f0', ai: 'aggressive'},
+            {name: 'Orc', hp: 100, dmg: 20, color: '#f00', ai: 'patrol'},
+            {name: 'Dragon', hp: 200, dmg: 50, color: '#ff0', ai: 'boss'}
+        ];
+        const ITEM_TYPES = [
+            {name: 'Potion', color: '#00f', effect: 'heal'},
+            {name: 'Sword', color: '#aaa', effect: 'weapon'},
+            {name: 'Gem', color: '#0ff', effect: 'mana'}
+        ];
+        const SPELLS = [
+            {name: 'Fireball', mana: 20, dmg: 30, range: 5},
+            {name: 'Heal', mana: 30, heal: 50},
+            {name: 'Teleport', mana: 50}
+        ];
+
+        // Game State
+        let gameState = {
+            player: {x: 0, y: 0, hp: 100, maxHp: 100, mana: 100, maxMana: 100, inventory: [], spells: [0,1,2], velocity: {x:0, y:0}},
+            map: [],
+            enemies: [],
+            items: [],
+            particles: [],
+            level: 1,
+            score: 0,
+            running: false,
+            paused: false
+        };
+
+        // Touch States
+        const touchStates = {up: false, down: false, left: false, right: false};
+
+        // Audio Context for Procedural Sounds
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Audio not supported');
+                }
+            }
+        }
+
+        function playSound(freq, duration, type = 'sine') {
+            if (!audioCtx) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = type;
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Lower volume
+                oscillator.start();
+                setTimeout(() => {
+                    try {
+                        oscillator.stop();
+                    } catch (e) {
+                        // Oscillator already stopped
+                    }
+                }, duration);
+            } catch (e) {
+                console.warn('Audio playback failed');
+            }
+        }
+
+        // Procedural Map Generation (Recursive Division Maze with Rooms)
+        function generateMap() {
+            const map = Array.from({length: MAP_SIZE}, () => Array(MAP_SIZE).fill(1)); // 1 = wall
+            function carve(x1, y1, x2, y2) {
+                const w = x2 - x1 + 1;
+                const h = y2 - y1 + 1;
+                if (w < 2 || h < 2) return;
+                const horizontal = w < h || (w === h && Math.random() > 0.5);
+                if (horizontal) {
+                    const wy = Math.floor(y1 + h / 2) - (Math.random() > 0.5 ? 1 : 0);
+                    for (let x = x1; x <= x2; x++) map[wy][x] = 0; // 0 = floor
+                    const dx = Math.floor(Math.random() * w) + x1;
+                    map[wy][dx] = 0; // Door
+                    carve(x1, y1, x2, wy - 1);
+                    carve(x1, wy + 1, x2, y2);
+                } else {
+                    const wx = Math.floor(x1 + w / 2) - (Math.random() > 0.5 ? 1 : 0);
+                    for (let y = y1; y <= y2; y++) map[y][wx] = 0;
+                    const dy = Math.floor(Math.random() * h) + y1;
+                    map[dy][wx] = 0;
+                    carve(x1, y1, wx - 1, y2);
+                    carve(wx + 1, y1, x2, y2);
+                }
+            }
+            carve(0, 0, MAP_SIZE - 1, MAP_SIZE - 1);
+            // Add rooms
+            for (let i = 0; i < 10; i++) {
+                const rx = Math.floor(Math.random() * (MAP_SIZE - 10));
+                const ry = Math.floor(Math.random() * (MAP_SIZE - 10));
+                const rw = 5 + Math.floor(Math.random() * 5);
+                const rh = 5 + Math.floor(Math.random() * 5);
+                for (let y = ry; y < ry + rh; y++) for (let x = rx; x < rx + rw; x++) if (y >= 0 && y < MAP_SIZE && x >= 0 && x < MAP_SIZE) map[y][x] = 0;
+            }
+            return map;
+        }
+
+        // A* Pathfinding for Enemy AI
+        function aStar(start, goal, map) {
+            const openSet = [{pos: start, g: 0, h: heuristic(start, goal), f: 0, parent: null}];
+            const closedSet = new Set();
+            while (openSet.length) {
+                openSet.sort((a, b) => a.f - b.f);
+                const current = openSet.shift();
+                if (current.pos.x === goal.x && current.pos.y === goal.y) {
+                    let path = [];
+                    let node = current;
+                    while (node) {
+                        path.push(node.pos);
+                        node = node.parent;
+                    }
+                    return path.reverse();
+                }
+                const key = `${current.pos.x},${current.pos.y}`;
+                if (closedSet.has(key)) continue;
+                closedSet.add(key);
+                getNeighbors(current.pos).forEach(neighbor => {
+                    const nKey = `${neighbor.x},${neighbor.y}`;
+                    if (closedSet.has(nKey) || map[neighbor.y][neighbor.x] === 1) return;
+                    const tentativeG = current.g + 1;
+                    let inOpen = openSet.find(n => n.pos.x === neighbor.x && n.pos.y === neighbor.y);
+                    if (!inOpen || tentativeG < inOpen.g) {
+                        if (!inOpen) {
+                            inOpen = {pos: neighbor, parent: current};
+                            openSet.push(inOpen);
+                        }
+                        inOpen.g = tentativeG;
+                        inOpen.h = heuristic(neighbor, goal);
+                        inOpen.f = inOpen.g + inOpen.h;
+                        inOpen.parent = current;
+                    }
+                });
+            }
+            return [];
+        }
+
+        function heuristic(a, b) {
+            return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+        }
+
+        function getNeighbors(pos) {
+            return [
+                {x: pos.x - 1, y: pos.y},
+                {x: pos.x + 1, y: pos.y},
+                {x: pos.x, y: pos.y - 1},
+                {x: pos.x, y: pos.y + 1}
+            ].filter(p => p.x >= 0 && p.x < MAP_SIZE && p.y >= 0 && p.y < MAP_SIZE);
+        }
+
+        // Particle System
+        function createParticles(x, y, color, count = 20) {
+            for (let i = 0; i < count; i++) {
+                gameState.particles.push({
+                    x, y,
+                    vx: Math.random() * 4 - 2,
+                    vy: Math.random() * 4 - 2,
+                    life: 1,
+                    color,
+                    size: Math.random() * 5 + 2
+                });
+            }
+        }
+
+        function updateParticles(delta) {
+            gameState.particles = gameState.particles.filter(p => {
+                p.x += p.vx * delta;
+                p.y += p.vy * delta;
+                p.life -= delta * 0.01; // Slower decay for better visuals
+                p.vy += 0.1; // Gravity
+                return p.life > 0;
+            });
+        }
+
+        function drawParticles() {
+            const offsetX = gameState.player.x * TILE_SIZE - canvas.width / 2;
+            const offsetY = gameState.player.y * TILE_SIZE - canvas.height / 2;
+            particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+            gameState.particles.forEach(p => {
+                particlesCtx.beginPath();
+                particlesCtx.arc(p.x - offsetX, p.y - offsetY, p.size * p.life, 0, Math.PI * 2);
+                particlesCtx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.life})`;
+                particlesCtx.fill();
+            });
+        }
+
+        function hexToRgb(hex) {
+            if (!hex || typeof hex !== 'string') return '255,255,255';
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(char => char + char).join('');
+            }
+            if (hex.length !== 6) return '255,255,255';
+            const r = parseInt(hex.slice(0, 2), 16) || 0;
+            const g = parseInt(hex.slice(2, 4), 16) || 0;
+            const b = parseInt(hex.slice(4, 6), 16) || 0;
+            return `${r},${g},${b}`;
+        }
+
+        // Drawing Functions
+        function drawMap() {
+            if (!gameState.map || gameState.map.length === 0) return;
+            
+            const offsetX = gameState.player.x * TILE_SIZE - canvas.width / 2;
+            const offsetY = gameState.player.y * TILE_SIZE - canvas.height / 2;
+            for (let y = 0; y < MAP_SIZE; y++) {
+                for (let x = 0; x < MAP_SIZE; x++) {
+                    const screenX = x * TILE_SIZE - offsetX;
+                    const screenY = y * TILE_SIZE - offsetY;
+                    if (screenX < -TILE_SIZE || screenX > canvas.width || screenY < -TILE_SIZE || screenY > canvas.height) continue;
+                    ctx.fillStyle = gameState.map[y][x] === 1 ? '#333' : '#111';
+                    ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                    ctx.strokeStyle = '#444';
+                    ctx.strokeRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
+
+        function drawEntity(entity, color, radius = TILE_SIZE/2) {
+            const offsetX = gameState.player.x * TILE_SIZE - canvas.width / 2;
+            const offsetY = gameState.player.y * TILE_SIZE - canvas.height / 2;
+            const screenX = entity.x * TILE_SIZE - offsetX;
+            const screenY = entity.y * TILE_SIZE - offsetY;
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE/2, screenY + TILE_SIZE/2, radius, 0, Math.PI*2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            // Eyes for personality
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE/3, screenY + TILE_SIZE/3, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(screenX + 2*TILE_SIZE/3, screenY + TILE_SIZE/3, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        function draw() {
+            if (!gameState.running || !gameState.map || gameState.map.length === 0) {
+                // Clear canvas and show a placeholder or menu
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMap();
+            drawEntity(gameState.player, '#00f');
+            gameState.enemies.forEach(e => drawEntity(e, e.color));
+            gameState.items.forEach(i => drawEntity(i, i.color, TILE_SIZE/3)); // Smaller for items
+            drawParticles();
+        }
+
+        // Update Logic
+        function update(delta) {
+            if (!gameState.running || gameState.paused) return;
+
+            // Player physics movement
+            gameState.player.x += gameState.player.velocity.x * delta;
+            gameState.player.y += gameState.player.velocity.y * delta;
+            gameState.player.velocity.x *= 0.9; // Friction
+            gameState.player.velocity.y *= 0.9;
+
+            // Better collision with walls
+            const px = Math.floor(gameState.player.x);
+            const py = Math.floor(gameState.player.y);
+            if (px < 0 || px >= MAP_SIZE || py < 0 || py >= MAP_SIZE || 
+                (gameState.map[py] && gameState.map[py][px] === 1)) {
+                gameState.player.x -= gameState.player.velocity.x * delta;
+                gameState.player.y -= gameState.player.velocity.y * delta;
+                gameState.player.velocity = {x:0, y:0};
+            }
+
+        // Enemy AI with better performance
+            gameState.enemies.forEach((enemy, index) => {
+                // Only update AI occasionally to improve performance
+                if ((Date.now() + index * 100) % 2000 < 50) { // Stagger AI updates
+                    const distance = Math.hypot(enemy.x - gameState.player.x, enemy.y - gameState.player.y);
+                    if (distance < 10) { // Only pathfind if player is nearby
+                        const path = aStar(
+                            {x: Math.floor(enemy.x), y: Math.floor(enemy.y)}, 
+                            {x: Math.floor(gameState.player.x), y: Math.floor(gameState.player.y)}, 
+                            gameState.map
+                        );
+                        if (path.length > 1) {
+                            const next = path[1];
+                            const moveSpeed = 0.5;
+                            const dx = next.x + 0.5 - enemy.x;
+                            const dy = next.y + 0.5 - enemy.y;
+                            const dist = Math.hypot(dx, dy);
+                            if (dist > 0) {
+                                enemy.x += (dx / dist) * moveSpeed * delta;
+                                enemy.y += (dy / dist) * moveSpeed * delta;
+                            }
+                        }
+                    }
+                }
+                // Combat if adjacent
+                if (Math.hypot(enemy.x - gameState.player.x, enemy.y - gameState.player.y) < 1) {
+                    gameState.player.hp -= enemy.dmg * delta * 0.01; // Reduced damage rate
+                    createParticles(gameState.player.x * TILE_SIZE, gameState.player.y * TILE_SIZE, '#f00');
+                    playSound(200, 100, 'sawtooth');
+                    if (gameState.player.hp <= 0) endGame();
+                }
+            });
+
+            // Item pickup
+            gameState.items = gameState.items.filter(item => {
+                if (Math.hypot(item.x - gameState.player.x, item.y - gameState.player.y) < 0.5) {
+                    gameState.player.inventory.push(item);
+                    updateInventoryUI();
+                    playSound(500, 200);
+                    return false;
+                }
+                return true;
+            });
+
+            // Regen mana
+            gameState.player.mana = Math.min(gameState.player.maxMana, gameState.player.mana + 0.1 * delta);
+
+            updateParticles(delta);
+            updateHUD();
+            draw();
+        }
+
+        function updateHUD() {
+            healthFill.style.width = `${Math.max(0, (gameState.player.hp / gameState.player.maxHp) * 100)}%`;
+            manaFill.style.width = `${Math.max(0, (gameState.player.mana / gameState.player.maxMana) * 100)}%`;
+        }
+
+        function updateInventoryUI() {
+            inventoryDiv.innerHTML = '';
+            gameState.player.inventory.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'inv-item';
+                div.style.backgroundColor = item.color;
+                div.onclick = () => useItem(idx);
+                inventoryDiv.appendChild(div);
+            });
+        }
+
+        function useItem(idx) {
+            const item = gameState.player.inventory[idx];
+            if (!item) return;
+            if (item.effect === 'heal') {
+                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + 50);
+                playSound(800, 300);
+            } else if (item.effect === 'mana') {
+                gameState.player.mana = Math.min(gameState.player.maxMana, gameState.player.mana + 50);
+            } // Add more effects
+            gameState.player.inventory.splice(idx, 1);
+            updateInventoryUI();
+        }
+
+        // Input Handling
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        function handleInput() {
+            gameState.player.velocity.x = 0;
+            gameState.player.velocity.y = 0;
+            if (keys['ArrowUp'] || keys['w'] || touchStates.up) gameState.player.velocity.y = -PLAYER_SPEED;
+            if (keys['ArrowDown'] || keys['s'] || touchStates.down) gameState.player.velocity.y = PLAYER_SPEED;
+            if (keys['ArrowLeft'] || keys['a'] || touchStates.left) gameState.player.velocity.x = -PLAYER_SPEED;
+            if (keys['ArrowRight'] || keys['d'] || touchStates.right) gameState.player.velocity.x = PLAYER_SPEED;
+        }
+
+        // Touch Controls with preventDefault
+        controls.up.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStates.up = true;
+        });
+        controls.up.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchStates.up = false;
+        });
+        controls.down.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStates.down = true;
+        });
+        controls.down.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchStates.down = false;
+        });
+        controls.left.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStates.left = true;
+        });
+        controls.left.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchStates.left = false;
+        });
+        controls.right.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStates.right = true;
+        });
+        controls.right.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchStates.right = false;
+        });
+        controls.attack.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            attack();
+        });
+        controls.spell.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            castSpell();
+        });
+
+        // Attack Function
+        function attack() {
+            gameState.enemies = gameState.enemies.filter(e => {
+                if (Math.hypot(e.x - gameState.player.x, e.y - gameState.player.y) < 1.5) {
+                    e.hp -= 20;
+                    createParticles(e.x * TILE_SIZE, e.y * TILE_SIZE, '#ff0', 30);
+                    playSound(300, 150, 'square');
+                    if (e.hp <= 0) {
+                        gameState.score += 100;
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+
+        // Spell Casting
+        function castSpell() {
+            if (gameState.player.mana < 20) return;
+            gameState.player.mana -= 20;
+            createParticles(gameState.player.x * TILE_SIZE, gameState.player.y * TILE_SIZE, '#f00', 50);
+            playSound(400, 400, 'triangle');
+            gameState.enemies = gameState.enemies.filter(e => {
+                if (Math.hypot(e.x - gameState.player.x, e.y - gameState.player.y) < 3) {
+                    e.hp -= 30;
+                    if (e.hp <= 0) {
+                        gameState.score += 150;
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+
+        // Game Init
+        function initGame(loadSave = false) {
+            console.log('initGame called, loadSave:', loadSave);
+            initAudio(); // Initialize audio on user interaction
+            if (loadSave) {
+                try {
+                    const save = localStorage.getItem('grokGameSave');
+                    if (save) {
+                        gameState = JSON.parse(save);
+                        console.log('Loaded save data');
+                    }
+                } catch (e) {
+                    console.warn('Failed to load save data');
+                    // Fall back to new game
+                    loadSave = false;
+                }
+            }
+            
+            if (!loadSave) {
+                console.log('Generating new game...');
+                gameState.map = generateMap();
+                console.log('Map generated, size:', gameState.map.length);
+                gameState.player.x = Math.floor(MAP_SIZE / 2) + 0.5;
+                gameState.player.y = Math.floor(MAP_SIZE / 2) + 0.5;
+                gameState.player.hp = 100;
+                gameState.player.mana = 100;
+                gameState.player.inventory = [];
+                gameState.enemies = [];
+                gameState.items = [];
+                gameState.score = 0;
+                
+                // Generate enemies
+                for (let i = 0; i < 20; i++) {
+                    let ex = Math.floor(Math.random() * MAP_SIZE);
+                    let ey = Math.floor(Math.random() * MAP_SIZE);
+                    let attempts = 0;
+                    while (gameState.map[ey][ex] !== 0 && attempts < 100) {
+                        ex = Math.floor(Math.random() * MAP_SIZE);
+                        ey = Math.floor(Math.random() * MAP_SIZE);
+                        attempts++;
+                    }
+                    if (attempts < 100) {
+                        const type = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)];
+                        gameState.enemies.push({...type, x: ex + 0.5, y: ey + 0.5, hp: type.hp});
+                    }
+                }
+                console.log('Generated', gameState.enemies.length, 'enemies');
+                
+                // Generate items
+                for (let i = 0; i < 10; i++) {
+                    let ix = Math.floor(Math.random() * MAP_SIZE);
+                    let iy = Math.floor(Math.random() * MAP_SIZE);
+                    let attempts = 0;
+                    while (gameState.map[iy][ix] !== 0 && attempts < 100) {
+                        ix = Math.floor(Math.random() * MAP_SIZE);
+                        iy = Math.floor(Math.random() * MAP_SIZE);
+                        attempts++;
+                    }
+                    if (attempts < 100) {
+                        const type = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+                        gameState.items.push({...type, x: ix + 0.5, y: iy + 0.5});
+                    }
+                }
+                console.log('Generated', gameState.items.length, 'items');
+            }
+            updateInventoryUI();
+            menu.style.display = 'none';
+            gameState.running = true;
+            console.log('Game started!');
+        }
+
+        function endGame() {
+            gameState.running = false;
+            gameState.paused = false;
+            setTimeout(() => {
+                alert(`Game Over! Score: ${gameState.score}`);
+                menu.style.display = 'block';
+            }, 100);
+        }
+
+        // Save Game
+        function saveGame() {
+            try {
+                localStorage.setItem('grokGameSave', JSON.stringify(gameState));
+            } catch (e) {
+                console.warn('Failed to save game data');
+            }
+        }
+
+        // Resize Handling
+        function resize() {
+            canvas.width = gameContainer.clientWidth;
+            canvas.height = gameContainer.clientHeight;
+            particlesCanvas.width = canvas.width;
+            particlesCanvas.height = canvas.height;
+            if (gameState.running) {
+                draw();
+            }
+        }
+        window.addEventListener('resize', resize);
+        
+        // Initialize canvas size
+        resize();
+        
+        // Draw initial screen
+        function drawInitialScreen() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ffff';
+            ctx.font = '32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText("Grok's Infinite Realm", canvas.width / 2, canvas.height / 2 - 40);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px Arial';
+            ctx.fillText("Click 'Start Game' to begin your adventure!", canvas.width / 2, canvas.height / 2 + 20);
+        }
+        
+        drawInitialScreen();
+
+        // Main Loop
+        let lastTime = 0;
+        function loop(time) {
+            const delta = time - lastTime;
+            lastTime = time;
+            handleInput();
+            update(delta / 16.67); // Normalize to ~60fps
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+
+        // Menu Events
+        startBtn.onclick = () => {
+            console.log('Starting new game...');
+            initGame(false);
+        };
+        loadBtn.onclick = () => {
+            console.log('Loading saved game...');
+            initGame(true);
+        };
+        settingsBtn.onclick = () => alert('Settings: Audio on/off, etc. (Coming soon)');
+
+        // Auto-save every 30s
+        setInterval(saveGame, 30000);
+
+        // Show menu initially
+        menu.style.display = 'block';
+
+        // Keyboard attack/spell/pause
+        window.addEventListener('keydown', e => {
+            if (e.key === ' ') attack();
+            if (e.key === 'e') castSpell();
+            if (e.key === 'p') gameState.paused = !gameState.paused;
+        });
+    </script>
+</body>
+</html>

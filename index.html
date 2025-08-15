@@ -1,216 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>AI Coding Comparison — Portfolio</title>
-	<meta name="description" content="Comparing the ability of different AI models in coding portfolios." />
-	<style>
-		:root {
-			--bg1: #0b0f19;
-			--bg2: #1f2937;
-			--btn-sonnet: #7c3aed;
-			--btn-gpt: #10b981;
-			--btn-gemini: #f59e0b;
-			--btn-hover: #6366f1;
-			--text: #e5e7eb;
-			--text-light: #9ca3af;
-		}
-		* { box-sizing: border-box; }
-		html, body { height: 100%; margin: 0; }
-		body {
-			display: grid; place-items: center; min-height: 100vh;
-			background: radial-gradient(1000px 500px at 10% -10%, rgba(124,58,237,.25), transparent 50%),
-									radial-gradient(900px 450px at 100% 0%, rgba(99,102,241,.25), transparent 50%),
-									linear-gradient(160deg, var(--bg1), var(--bg2));
-			color: var(--text);
-			font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-			padding: clamp(16px, 4vw, 24px);
-		}
-		.wrap { 
-			text-align: center; 
-			max-width: 800px;
-			width: 100%;
-			padding: 0 clamp(8px, 2vw, 16px);
-		}
-		h1 { 
-			font-size: clamp(1.5rem, 5vw, 2.5rem); 
-			font-weight: 700; 
-			margin: 0 0 clamp(12px, 3vw, 16px); 
-			letter-spacing: .4px; 
-			line-height: 1.2;
-		}
-		.objective {
-			background: rgba(255,255,255,0.05);
-			border-radius: clamp(8px, 2vw, 12px);
-			padding: clamp(16px, 4vw, 24px);
-			margin: clamp(16px, 4vw, 24px) 0;
-			border: 1px solid rgba(255,255,255,0.1);
-		}
-		.objective h2 {
-			font-size: clamp(1.1rem, 3vw, 1.25rem);
-			margin: 0 0 clamp(8px, 2vw, 12px);
-			color: var(--btn-hover);
-		}
-		.objective p {
-			margin: 0 0 clamp(12px, 3vw, 16px);
-			line-height: 1.6;
-			color: var(--text-light);
-			font-size: clamp(0.9rem, 2.5vw, 1rem);
-		}
-		.prompt-box {
-			background: rgba(0,0,0,0.3);
-			border-radius: clamp(6px, 1.5vw, 8px);
-			padding: clamp(12px, 3vw, 16px);
-			margin: clamp(12px, 3vw, 16px) 0;
-			font-family: 'Courier New', monospace;
-			font-size: clamp(0.8rem, 2vw, 0.9rem);
-			text-align: left;
-			border-left: 4px solid var(--btn-hover);
-			word-break: break-word;
-			overflow-wrap: break-word;
-		}
-		.buttons-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
-			gap: clamp(10px, 3vw, 16px);
-			margin-top: clamp(24px, 5vw, 32px);
-		}
-		.btn {
-			display: block;
-			padding: clamp(14px, 3.5vw, 18px) clamp(16px, 4vw, 24px);
-			font-size: clamp(1rem, 2.5vw, 1.1rem);
-			font-weight: 600;
-			color: white;
-			border-radius: clamp(8px, 2vw, 12px);
-			border: none;
-			text-decoration: none;
-			transition: all .15s ease;
-			position: relative;
-			overflow: hidden;
-			min-height: 60px;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-		}
-		.btn::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: -100%;
-			width: 100%;
-			height: 100%;
-			background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-			transition: left 0.5s;
-		}
-		.btn:hover::before {
-			left: 100%;
-		}
-		.btn:hover { 
-			transform: translateY(-2px); 
-			box-shadow: 0 8px 25px rgba(0,0,0,0.3); 
-			text-decoration: none; 
-		}
-		.btn:active { 
-			transform: translateY(0); 
-		}
-		.btn-sonnet {
-			background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-			box-shadow: 0 4px 15px rgba(124,58,237,0.4);
-		}
-		.btn-gpt {
-			background: linear-gradient(135deg, #10b981, #34d399);
-			box-shadow: 0 4px 15px rgba(16,185,129,0.4);
-		}
-		.btn-gemini {
-			background: linear-gradient(135deg, #f59e0b, #fbbf24);
-			box-shadow: 0 4px 15px rgba(245,158,11,0.4);
-		}
-		.ai-label {
-			font-size: clamp(0.8rem, 2vw, 0.85rem);
-			opacity: 0.9;
-			font-weight: 400;
-			display: block;
-			margin-bottom: 4px;
-		}
-		.sub { 
-			margin-top: clamp(20px, 5vw, 24px); 
-			opacity: .7; 
-			font-size: clamp(0.85rem, 2vw, 0.9rem); 
-			line-height: 1.5;
-			padding: 0 clamp(8px, 2vw, 16px);
-		}
-		
-		/* Mobile-specific optimizations */
-		@media (max-width: 480px) {
-			.buttons-grid {
-				grid-template-columns: 1fr;
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>IqbalSHD • Home</title>
+		<style>
+			:root {
+				--bg: #0b132b;
+				--bg2: #0f2040;
+				--card: #1c2541;
+				--text: #e6edf6;
+				--muted: #b9c2cf;
+				--accent: #5bc0be;
+				--accent2: #9b5de5;
+			}
+			* { box-sizing: border-box; }
+			html, body { height: 100%; }
+			body {
+				margin: 0;
+				font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+				background: linear-gradient(180deg, var(--bg), var(--bg2));
+				color: var(--text);
+			}
+			.container { max-width: 1100px; margin: 0 auto; padding: 32px 20px 48px; }
+			header { display: grid; gap: 8px; margin-bottom: 16px; }
+			h1 { margin: 0; font-size: 2rem; letter-spacing: 0.2px; }
+			.sub { color: var(--muted); margin: 0; }
+			section { margin-top: 28px; }
+			section h2 { font-size: 1.1rem; font-weight: 600; margin: 0 0 10px; color: #dfe7f3; }
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 				gap: 12px;
 			}
-			
-			.btn {
-				min-height: 70px;
+			a.button {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8px;
+				padding: 14px 16px;
+				border-radius: 12px;
+				background: var(--card);
+				color: var(--text);
+				text-decoration: none;
+				border: 1px solid rgba(255, 255, 255, 0.08);
+				transition: transform 120ms ease, border-color 160ms ease, box-shadow 160ms ease;
+				text-align: center;
 			}
-			
-			.prompt-box {
-				font-size: 0.8rem;
-				line-height: 1.4;
-			}
-			
-			.objective {
-				margin: 16px 0;
-			}
-		}
-		
-		/* Touch-friendly interactions */
-		@media (hover: none) {
-			.btn:hover {
-				transform: none;
-			}
-			
-			.btn:active {
-				transform: scale(0.98);
-				transition: transform 0.1s ease;
-			}
-		}
-	</style>
-</head>
-<body>
-	<main class="wrap" aria-label="AI Coding Comparison">
-		<h1>AI Coding Ability Comparison</h1>
-		
-		<div class="objective">
-			<h2>🎯 Objective</h2>
-			<p>To compare the ability of different AI models in coding by having them create portfolio websites based on the same source material.</p>
-			
-			<div class="prompt-box">
-				<strong>Prompt given to each AI:</strong><br>
-				"Read this web https://iqbalshd.github.io/Portfolio/ then create my portfolio using that information."
-			</div>
-		</div>
+			a.button:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 20px rgba(91, 192, 190, 0.15); }
+			.badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: rgba(91,192,190,0.18); color: var(--accent); border: 1px solid rgba(91,192,190,0.35); }
+			footer { margin-top: 36px; color: var(--muted); font-size: 0.95rem; }
+			.wrap { display: grid; gap: 18px; }
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1>IqbalSHD • Navigation</h1>
+				<p class="sub">Quick links to portfolio and game pages.</p>
+			</header>
 
-		<div class="buttons-grid">
-			<a class="btn btn-sonnet" href="portfolio_sonnet.html" aria-label="View Claude Sonnet 4 generated portfolio">
-				<span class="ai-label">Claude Sonnet 4</span>
-				View Portfolio
-			</a>
-			
-			<a class="btn btn-gpt" href="portfolio_gpt.html" aria-label="View ChatGPT generated portfolio">
-				<span class="ai-label">ChatGPT-5</span>
-				View Portfolio
-			</a>
-			
-			<a class="btn btn-gemini" href="portfolio_gemini.html" aria-label="View Google Gemini generated portfolio">
-				<span class="ai-label">Google Gemini 2.5 Pro</span>
-				View Portfolio
-			</a>
-		</div>
+			<section>
+				<h2>Portfolio (AI‑generated)</h2>
+				<div class="grid">
+					<a class="button" href="portfolio%20create%20by%20AI%20own%20website/pfl_geminipro.html">Gemini Pro Portfolio <span class="badge">AI</span></a>
+					<a class="button" href="portfolio%20create%20by%20AI%20own%20website/pfl_gpt5.html">GPT‑5 Portfolio <span class="badge">AI</span></a>
+					<a class="button" href="portfolio%20create%20by%20AI%20own%20website/pfl_grok.html">Grok Portfolio <span class="badge">AI</span></a>
+					<a class="button" href="portfolio%20create%20by%20AI%20own%20website/pfl_sonnet.html">Sonnet Portfolio <span class="badge">AI</span></a>
+				</div>
+			</section>
 
-		<div class="sub">
-			Each AI was given the same prompt and access to the original portfolio.<br>
-			Compare their interpretations, design choices, and coding approaches.
+			<section>
+				<h2>Portfolio (GitHub Copilot)</h2>
+				<div class="grid">
+					<a class="button" href="portfolio%20create%20by%20github%20copilot/gemini25pro.html">Gemini 2.5 Pro Portfolio</a>
+					<a class="button" href="portfolio%20create%20by%20github%20copilot/gpt5.html">GPT‑5 Portfolio</a>
+					<a class="button" href="portfolio%20create%20by%20github%20copilot/sonnet4.html">Sonnet 4 Portfolio</a>
+				</div>
+			</section>
+
+			<section>
+				<h2>Games (AI‑generated)</h2>
+				<div class="grid">
+					<a class="button" href="game%20create%20by%20AI%20own%20website/game_gemini.html">Game: Gemini</a>
+					<a class="button" href="game%20create%20by%20AI%20own%20website/game_gpt5.html">Game: GPT‑5</a>
+					<a class="button" href="game%20create%20by%20AI%20own%20website/game_grok.html">Game: Grok</a>
+					<a class="button" href="game%20create%20by%20AI%20own%20website/game_sonnet4.html">Game: Sonnet 4</a>
+				</div>
+			</section>
+
+			<footer>
+				<div class="wrap">
+					<div>Last updated: <span id="last-updated"></span></div>
+				</div>
+			</footer>
 		</div>
-	</main>
-</body>
-</html>
+		<script>
+			// Small enhancement: render a friendly last-updated date in local time
+			(function () {
+				var el = document.getElementById('last-updated');
+				if (!el) return;
+				try {
+					// If the site is served by GitHub Pages this reflects the build time.
+					var d = new Date(document.lastModified);
+					el.textContent = d.toLocaleString(undefined, {
+						year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'
+					});
+				} catch (_) { el.textContent = '—'; }
+			})();
+		</script>
+	</body>
+	</html>

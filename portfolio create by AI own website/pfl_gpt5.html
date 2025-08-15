@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Muhammad Iqbal bin Suhaidin — Backend & Full‑Stack Engineer</title>
+  <meta name="description" content="Backend & full‑stack engineer delivering resilient, scalable web systems. PHP • MySQL • Python • C# • Modern Web. Portfolio, projects, and experience." />
+  <meta name="theme-color" content="#0ea5e9" />
+  <!-- Open Graph -->
+  <meta property="og:title" content="Muhammad Iqbal — Backend & Full‑Stack Engineer" />
+  <meta property="og:description" content="Resilient, scalable web systems. PHP • MySQL • Python • C# • Modern Web." />
+  <meta property="og:type" content="website" />
+  
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #0f172a;
+      --muted: #a3aed0;
+      --text: #e6eaf8;
+      --brand: #22d3ee;   /* cyan */
+      --brand-2: #60a5fa; /* blue */
+      --ok: #34d399;      /* green */
+      --warn: #fbbf24;    /* amber */
+      --err: #f87171;     /* red */
+      --ring: color-mix(in oklab, var(--brand), transparent 70%);
+      --shadow: 0 10px 30px rgb(0 0 0 / .35);
+      --radius: 18px;
+    }
+    [data-theme="light"]{
+      --bg:#f8fafc; --panel:#ffffff; --text:#0b1020; --muted:#51607a; --shadow:0 10px 30px rgb(2 6 23 / .08);
+    }
+    * { box-sizing: border-box }
+    html { scroll-behavior: smooth }
+    body { margin:0; font: 15px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: radial-gradient(1200px 800px at 80% -10%, color-mix(in oklab, var(--brand) 30%, transparent), transparent) no-repeat, var(--bg); color: var(--text); }
+    a { color: var(--brand-2); text-decoration: none }
+    a:hover { text-decoration: underline }
+
+    /* Layout */
+    .shell { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    header.site { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: color-mix(in oklab, var(--bg), transparent 30%); border-bottom: 1px solid color-mix(in oklab, var(--text) 12%, transparent); }
+    .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 24px; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.2px }
+    .brand .logo { width:36px; height:36px; border-radius: 10px; background: conic-gradient(from 180deg at 50% 50%, var(--brand), var(--brand-2), var(--ok), var(--brand)); box-shadow: var(--shadow);}
+    nav a { padding: 8px 12px; border-radius: 999px; }
+    nav a:hover, nav a:focus-visible { outline: none; background: color-mix(in oklab, var(--text) 10%, transparent); }
+
+    .theme { display:flex; gap:10px; align-items:center }
+    .btn { display:inline-flex; align-items:center; gap:10px; background: linear-gradient(180deg, color-mix(in oklab, var(--panel), white 6%), var(--panel)); border:1px solid color-mix(in oklab, var(--text) 12%, transparent); padding: 10px 14px; border-radius: 12px; box-shadow: var(--shadow); color: var(--text); }
+    .btn:hover { transform: translateY(-1px); }
+
+    /* Hero */
+    .hero { display:grid; grid-template-columns: 1.1fr .9fr; gap: 28px; align-items: center; padding: 48px 0; }
+    .tag { display:inline-block; padding:6px 10px; border-radius: 999px; background: color-mix(in oklab, var(--brand) 20%, transparent); color: var(--text); border:1px solid var(--ring) }
+    .hero h1 { font-size: clamp(32px, 4.4vw, 54px); line-height:1.07; margin: 14px 0 10px; }
+    .hero p { font-size: clamp(16px, 1.5vw, 18px); color: var(--muted) }
+    .hero .cta { display:flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    .pill { padding: 10px 16px; border-radius: 999px; border:1px solid color-mix(in oklab, var(--text) 12%, transparent); background: var(--panel); box-shadow: var(--shadow); }
+    .kpi { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px }
+    .kpi .card { padding: 14px; border-radius: 14px; background: var(--panel); border:1px solid color-mix(in oklab, var(--text) 12%, transparent); text-align:center }
+    .metric { font-size: 28px; font-weight: 800 }
+
+    /* Sections */
+    section { padding: 40px 0; }
+    .section-title { display:flex; align-items:center; gap:12px; font-size: 20px; letter-spacing:.2px; margin-bottom: 16px }
+    .section-title .dot { width:10px; height:10px; border-radius:999px; background: radial-gradient(circle at 30% 30%, white, var(--brand)); box-shadow: 0 0 0 6px color-mix(in oklab, var(--brand), transparent 70%); }
+
+    .grid { display:grid; gap: 16px }
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)) }
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)) }
+
+    .card { background: var(--panel); border:1px solid color-mix(in oklab, var(--text) 12%, transparent); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+    .card:hover { translate: 0 -2px }
+    .chip { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid color-mix(in oklab, var(--text) 12%, transparent); background: color-mix(in oklab, var(--panel), white 2%); margin: 4px 6px 0 0; font-size: 12px }
+    .chip svg { width:14px; height:14px }
+
+    /* Experience */
+    .timeline { position: relative; }
+    .timeline:before { content:""; position:absolute; left: 10px; top: 0; bottom: 0; width:2px; background: color-mix(in oklab, var(--text) 12%, transparent) }
+    .item { position: relative; padding-left: 34px; margin: 14px 0 }
+    .item:before { content:""; position:absolute; left:3px; top:8px; width:14px; height:14px; border-radius:999px; background: radial-gradient(circle at 30% 30%, white, var(--brand)); box-shadow: 0 0 0 5px color-mix(in oklab, var(--brand), transparent 70%); }
+
+    /* Projects */
+    .project { display:flex; gap: 14px; align-items:flex-start }
+    .project img { width: 110px; height: 72px; border-radius: 12px; object-fit: cover; border:1px solid color-mix(in oklab, var(--text) 12%, transparent) }
+    .project h3 { margin: 4px 0 6px }
+    .project p { margin: 0 0 6px; color: var(--muted) }
+
+    /* Footer */
+    footer { padding: 60px 0 80px; color: var(--muted) }
+
+    /* Utilities */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .row { display:flex; gap: 12px; flex-wrap:wrap }
+    .right { margin-left: auto }
+    .muted { color: var(--muted) }
+
+    /* Responsive */
+    @media (max-width: 980px){ .hero { grid-template-columns: 1fr; } .grid.cols-3 { grid-template-columns: 1fr 1fr } }
+    @media (max-width: 620px){ .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr } header.site .bar { flex-wrap: wrap } }
+
+    /* Print */
+    @media print{ header.site, .theme, .cta .btn.secondary, .pill[data-action="download"]{ display:none !important } body{ background:white } .card, .pill, .kpi .card{ box-shadow:none } }
+  </style>
+
+  <script>
+    // Persisted theme
+    const pref = localStorage.getItem('theme');
+    if(pref){ document.documentElement.setAttribute('data-theme', pref); }
+  </script>
+  
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Person",
+    "name":"Muhammad Iqbal bin Suhaidin",
+    "jobTitle":"Backend & Full‑Stack Engineer",
+    "email":"mailto:iqbal22shd@gmail.com",
+    "telephone":"+60196356149",
+    "address":{"@type":"PostalAddress","addressLocality":"Seri Kembangan","addressRegion":"Selangor","addressCountry":"MY"},
+    "url":"https://iqbalshd.github.io/Portfolio/",
+    "sameAs":["https://github.com/IqbalSHD","https://my.linkedin.com"],
+    "knowsAbout":["PHP","MySQL","Python","C#","C++","Java","HTML","CSS","Machine Learning","Backend Development","Full‑Stack Development"]
+  }
+  </script>
+</head>
+
+<body>
+  <a href="#content" class="sr-only">Skip to content</a>
+  <header class="site">
+    <div class="bar shell">
+      <div class="brand" aria-label="Site identity">
+        <span class="logo" aria-hidden="true"></span>
+        <span>Muhammad Iqbal / Portfolio</span>
+      </div>
+      <nav class="row" aria-label="Primary">
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#skills">Skills</a>
+        <a href="#awards">Awards</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="theme">
+        <button class="btn" id="toggleTheme" aria-pressed="false" aria-label="Toggle dark mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <a href="#" class="btn secondary" onclick="window.print();return false;" title="Print / Save as PDF">Export PDF</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="content" class="shell">
+    <!-- HERO -->
+    <section class="hero" aria-label="Introduction">
+      <div>
+        <span class="tag">Open to impactful backend work</span>
+        <h1>Hi, I’m <span style="color:var(--brand)">Muhammad Iqbal</span> — a backend & full‑stack engineer who ships reliable, scalable web systems.</h1>
+        <p>
+          Computer Science graduate passionate about backend and full‑stack development. Proven hands‑on experience across PHP, MySQL, Python, C#, and modern web technologies. I focus on maintainable code, clean database design, and pragmatic delivery.
+        </p>
+        <div class="cta">
+          <a class="pill" href="#projects">View Projects</a>
+          <a class="pill" href="#contact">Contact Me</a>
+          <a class="pill" data-action="download" href="#" onclick="window.print();return false;">Download as PDF</a>
+        </div>
+        <div class="kpi">
+          <div class="card"><div class="metric" aria-label="Years of experience">3+</div><div class="muted">Years delivering software</div></div>
+          <div class="card"><div class="metric">10+</div><div class="muted">Projects shipped</div></div>
+          <div class="card"><div class="metric">99.9%</div><div class="muted">Uptime mindset</div></div>
+        </div>
+      </div>
+      <div class="card" aria-label="Quick links">
+        <div class="row">
+          <a class="chip" href="https://github.com/IqbalSHD" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.41-1.34-1.79-1.34-1.79-1.09-.74.08-.73.08-.73 1.2.09 1.83 1.23 1.83 1.23 1.07 1.83 2.82 1.3 3.51.99.11-.77.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.96 0-1.32.47-2.4 1.23-3.25-.12-.3-.53-1.51.12-3.15 0 0 1.01-.32 3.3 1.24a11.5 11.5 0 0 1 6.01 0c2.29-1.56 3.3-1.24 3.3-1.24.66 1.64.25 2.85.12 3.15.77.85 1.23 1.93 1.23 3.25 0 4.63-2.81 5.66-5.49 5.96.43.37.81 1.1.81 2.23v3.31c0 .32.21.7.82.58A12 12 0 0 0 12 .5Z"/></svg> GitHub</a>
+          <a class="chip" href="https://my.linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
+          <a class="chip" href="mailto:iqbal22shd@gmail.com">Email</a>
+          <a class="chip" href="tel:+60196356149">Call</a>
+          <a class="chip" href="https://wa.me/60196356149" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+        <hr style="border:none;border-top:1px solid color-mix(in oklab, var(--text) 12%, transparent); margin:16px 0"/>
+        <div class="row" role="search" aria-label="Search projects">
+          <input id="query" placeholder="Search projects…" class="pill" style="flex:1; min-width:220px"/>
+          <button class="btn" onclick="filterProjects()">Search</button>
+          <button class="btn" onclick="resetFilter()">Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" aria-label="Experience">
+      <div class="section-title"><span class="dot"></span><strong>Experience</strong></div>
+      <div class="grid cols-2">
+        <div class="card timeline">
+          <div class="item">
+            <h3>Backend Developer — Pintas Utama Sdn Bhd <span class="muted">(Feb 2025 – Present)</span></h3>
+            <ul>
+              <li>Architected and delivered a custom Property Management System on cPanel with PHP & MySQL.</li>
+              <li>Implemented file validation, role‑based access, expiration monitoring, and tabbed dashboards.</li>
+              <li>Enabled export to Excel/PDF with category/type/financing filters and mobile‑responsive UX.</li>
+            </ul>
+          </div>
+          <div class="item">
+            <h3>Web Designer & Postmaster Admin — Ministry of Health HQ <span class="muted">(Sep 2024 – Dec 2024)</span></h3>
+            <ul>
+              <li>Redesigned legacy sites to modern layouts improving usability and accessibility.</li>
+              <li>Operated Postmaster comms for government stakeholders with high deliverability.</li>
+            </ul>
+          </div>
+          <div class="item">
+            <h3>IT Support & Web Dev Intern — Kulim Technology Park Corp <span class="muted">(Mar 2024 – Jun 2024)</span></h3>
+            <ul>
+              <li>Built WordPress site for Kulim Golf & Country Resort; updated e‑procurement to C# .NET.</li>
+              <li>Led STEM engagements (KIDEC 2024, STEM4FUN) and delivered technical event ops.</li>
+            </ul>
+          </div>
+          <div class="item">
+            <h3>Software Dev Intern — Pejabat Daerah & Tanah, Alor Setar <span class="muted">(Oct 2020 – Dec 2020)</span></h3>
+            <ul>
+              <li>Developed office asset management (Java, MySQL) with auth, CRUD, search, and reporting.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Core Focus</h3>
+          <p class="muted">Backend platforms, data models, and pragmatic full‑stack delivery.</p>
+          <div class="row">
+            <span class="chip">PHP</span>
+            <span class="chip">MySQL</span>
+            <span class="chip">Python</span>
+            <span class="chip">C# / .NET</span>
+            <span class="chip">C++ / Java</span>
+            <span class="chip">HTML / CSS</span>
+            <span class="chip">Machine Learning</span>
+            <span class="chip">REST APIs</span>
+            <span class="chip">Systems Design</span>
+          </div>
+          <h3 style="margin-top:14px">Operating Principles</h3>
+          <ul>
+            <li>Design for correctness first; optimize with data, not hunches.</li>
+            <li>Keep interfaces simple, fast, and accessible. WCAG AA by default.</li>
+            <li>Automate repeatable tasks. Measure what matters.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" aria-label="Projects">
+      <div class="section-title"><span class="dot"></span><strong>Highlighted Projects</strong></div>
+      <div class="grid cols-3" id="projectGrid">
+        <!-- Project cards -->
+        <article class="card project" data-tags="python,ml,streamlit,health">
+          <img loading="lazy" alt="Heart disease app UI" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'%3E%3Crect width='640' height='400' fill='%2322d3ee'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='white'%3EHeart Disease — Random Forest%3C/text%3E%3C/svg%3E"/>
+          <div>
+            <h3>Heart Disease Prediction (Random Forest)</h3>
+            <p>End‑to‑end classifier with Streamlit UI; KNN and SVC baselines; clean feature pipeline and result explainability.</p>
+            <div class="row">
+              <span class="chip">Python</span><span class="chip">Streamlit</span><span class="chip">ML</span>
+            </div>
+          </div>
+        </article>
+        <article class="card project" data-tags="matlab,cnn,vision">
+          <img loading="lazy" alt="Animal recognition UI" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'%3E%3Crect width='640' height='400' fill='%2360a5fa'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='white'%3EAnimal Recognition — CNN%3C/text%3E%3C/svg%3E"/>
+          <div>
+            <h3>Animal Recognition (CNN)</h3>
+            <p>MATLAB‑based CNN with image processing and interactive UI for selecting, scanning, and visualizing predictions.</p>
+            <div class="row">
+              <span class="chip">MATLAB</span><span class="chip">CNN</span><span class="chip">Computer Vision</span>
+            </div>
+          </div>
+        </article>
+        <article class="card project" data-tags="php,web,mysql">
+          <img loading="lazy" alt="Ordering system UI" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'%3E%3Crect width='640' height='400' fill='%2334d399'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='white'%3EOnline Ordering System%3C/text%3E%3C/svg%3E"/>
+          <div>
+            <h3>Online Ordering System</h3>
+            <p>Full web stack app: customer registration, ordering, cart, and admin management. Built with PHP, HTML/CSS, MySQL.</p>
+            <div class="row">
+              <span class="chip">PHP</span><span class="chip">MySQL</span><span class="chip">Web</span>
+            </div>
+          </div>
+        </article>
+        <article class="card project" data-tags="python,ml,gui,data">
+          <img loading="lazy" alt="Loan prediction app UI" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'%3E%3Crect width='640' height='400' fill='%23fbbf24'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='white'%3ELoan Prediction%3C/text%3E%3C/svg%3E"/>
+          <div>
+            <h3>Loan Prediction</h3>
+            <p>Python app with robust preprocessing, correlation analysis, and class‑balancing to drive fairer credit decisions.</p>
+            <div class="row">
+              <span class="chip">Python</span><span class="chip">Data</span><span class="chip">GUI</span>
+            </div>
+          </div>
+        </article>
+        <article class="card project" data-tags="csharp,desktop,sqlserver">
+          <img loading="lazy" alt="Client management UI" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'%3E%3Crect width='640' height='400' fill='%23f87171'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='white'%3EClient Management (C%23)%3C/text%3E%3C/svg%3E"/>
+          <div>
+            <h3>Client Management System</h3>
+            <p>Desktop CRUD app in C# with SQL Server, showcasing clean layering and data access patterns.</p>
+            <div class="row">
+              <span class="chip">C#</span><span class="chip">SQL Server</span><span class="chip">Desktop</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" aria-label="Skills">
+      <div class="section-title"><span class="dot"></span><strong>Technical Skills</strong></div>
+      <div class="card">
+        <div class="row">
+          <span class="chip">PHP</span><span class="chip">MySQL</span><span class="chip">Python</span><span class="chip">C#</span><span class="chip">C++</span><span class="chip">Java</span><span class="chip">HTML</span><span class="chip">CSS</span>
+          <span class="chip">Random Forest</span><span class="chip">Decision Tree</span><span class="chip">KNN</span><span class="chip">SVC</span>
+          <span class="chip">Git</span><span class="chip">Systems Design</span><span class="chip">REST</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- AWARDS -->
+    <section id="awards" aria-label="Awards">
+      <div class="section-title"><span class="dot"></span><strong>Awards</strong></div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Silver Award — Heart Disease Prediction Using Machine Learning Techniques</h3>
+          <p class="muted">20th Open International Innovations Challenge, UiTM Cawangan Pulau Pinang — 5 Sep 2024</p>
+        </div>
+        <div class="card">
+          <h3>Showcase & Events</h3>
+          <ul>
+            <li>KIDEC 2024 — Exhibitor & demos</li>
+            <li>STEM4FUN — Coding & MakeCode activities</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" aria-label="Contact">
+      <div class="section-title"><span class="dot"></span><strong>Contact</strong></div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Let’s build something reliable.</h3>
+          <p class="muted">Based in Seri Kembangan, Selangor. Open to remote or hybrid engagements across Malaysia.</p>
+          <div class="row">
+            <a class="btn" href="mailto:iqbal22shd@gmail.com">Email</a>
+            <a class="btn" href="https://wa.me/60196356149" target="_blank" rel="noopener">WhatsApp</a>
+            <a class="btn" href="tel:+60196356149">Call</a>
+          </div>
+        </div>
+        <form class="card" onsubmit="event.preventDefault(); alert('Thanks! I\'ll get back to you shortly.');">
+          <label class="sr-only" for="name">Name</label>
+          <input id="name" class="pill" placeholder="Your name" required style="width:100%; margin-bottom:10px"/>
+          <label class="sr-only" for="email">Email</label>
+          <input id="email" class="pill" placeholder="Email" type="email" required style="width:100%; margin-bottom:10px"/>
+          <label class="sr-only" for="msg">Message</label>
+          <textarea id="msg" class="pill" placeholder="Your message" rows="4" required style="width:100%; margin-bottom:10px"></textarea>
+          <button class="btn" type="submit">Send Inquiry</button>
+        </form>
+      </div>
+    </section>
+
+    <footer class="shell">
+      <p>© <span id="year"></span> Muhammad Iqbal bin Suhaidin. Built with semantic HTML, custom CSS, and zero dependencies — optimized for speed, accessibility, and print.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Theme toggling
+    const toggle = document.getElementById('toggleTheme');
+    toggle?.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const nxt = cur === 'light' ? null : 'light';
+      if(nxt){ document.documentElement.setAttribute('data-theme', nxt); } else { document.documentElement.removeAttribute('data-theme'); }
+      localStorage.setItem('theme', nxt || 'dark');
+      toggle.setAttribute('aria-pressed', String(nxt === 'light'));
+    });
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Project filtering
+    function filterProjects(){
+      const q = (document.getElementById('query').value || '').toLowerCase();
+      const nodes = Array.from(document.querySelectorAll('#projectGrid .project'));
+      nodes.forEach(n => {
+        const text = n.innerText.toLowerCase();
+        n.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+    function resetFilter(){ document.getElementById('query').value=''; filterProjects(); }
+
+    // Subtle reveal animations respecting reduced motion
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!prefersReduced){
+      const ob = new IntersectionObserver((entries) => {
+        for(const e of entries){ if(e.isIntersecting){ e.target.animate([{opacity:0, transform:'translateY(8px)'},{opacity:1, transform:'translateY(0)'}], {duration:500, easing:'cubic-bezier(.2,.6,.2,1)'}); ob.unobserve(e.target);} }
+      }, { threshold: .15 });
+      document.querySelectorAll('.card, .project, .item').forEach(el => ob.observe(el));
+    }
+
+    // Keyboard focus ring polyfill for mouse users
+    document.addEventListener('mousedown', () => document.body.classList.add('using-mouse'));
+    document.addEventListener('keydown', () => document.body.classList.remove('using-mouse'));
+  </script>
+</body>
+</html>

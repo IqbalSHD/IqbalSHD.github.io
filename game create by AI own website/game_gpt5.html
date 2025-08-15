@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Flux Arena — Single‑File Web Game</title>
+  <meta name="description" content="Flux Arena: a premium, single‑file arena roguelite showcasing best‑in‑class UI/UX, accessibility, and performance engineering." />
+  <style>
+    :root {
+      --bg: #0a0b10;
+      --panel: #0f1220cc;
+      --text: #e9ecf1;
+      --muted: #aab3c2;
+      --accent: #7cf7d4;
+      --accent-2: #7db2ff;
+      --danger: #ff5d7a;
+      --gold: #ffd166;
+      --ok: #9cff6a;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 16px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root { --bg:#f8fafc; --panel:#ffffffdd; --text:#0b1220; --muted:#5b6577; --accent:#0fb; --accent-2:#3b82f6; --danger:#e11d48; --gold:#f59e0b; --ok:#16a34a; }
+      canvas { background: radial-gradient(1200px 800px at 50% 40%, #e8f1ff, #f7fbff 30%, #e6f2ff 60%, #f6f9ff 75%, #eef6ff 100%); }
+    }
+    html, body { height:100%; }
+    body {
+      margin:0; background: var(--bg);
+      color: var(--text); font: 500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji";
+      display:grid; grid-template-rows: 1fr;
+      overflow:hidden;
+    }
+    /* Layout */
+    #root { position:relative; isolation:isolate; }
+    canvas { position:absolute; inset:0; width:100%; height:100%; display:block; background:
+      radial-gradient(1200px 800px at 50% 40%, #05060b, #080a12 30%, #0a0c16 60%, #0a0b10 75%, #080a0f 100%);
+      image-rendering: optimize-quality;
+      touch-action:none;
+    }
+    .hud { position:absolute; inset:0; display:flex; flex-direction:column; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); pointer-events:none; }
+    .topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+    .pill { pointer-events:auto; backdrop-filter: blur(12px) saturate(110%); background:var(--panel); border:1px solid rgba(255,255,255,.08); box-shadow: var(--shadow); border-radius:999px; padding:8px 14px; display:inline-flex; align-items:center; gap:10px; }
+    .brand { font-weight:800; letter-spacing:.3px; }
+    .kpi { display:flex; gap:10px; align-items:center; }
+    .kpi span { opacity:.7; font-variant-numeric: tabular-nums; }
+    .right { display:flex; gap:10px; align-items:center; }
+    .btn { pointer-events:auto; user-select:none; cursor:pointer; border:none; background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); color:var(--text); border-radius:999px; padding:10px 14px; display:inline-flex; align-items:center; gap:8px; box-shadow:var(--shadow); transition: transform .08s ease, filter .2s ease; border:1px solid rgba(255,255,255,.09); }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.07); }
+    .btn:active { transform: translateY(1px) scale(.985); }
+    .seg { display:flex; gap:0; border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.09); box-shadow: var(--shadow); pointer-events:auto; }
+    .seg button { background:transparent; padding:10px 12px; border:none; color:var(--text); cursor:pointer; }
+    .seg button[aria-pressed="true"] { background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); }
+
+    /* Panels */
+    .panel { pointer-events:auto; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:min(820px, calc(100% - 24px)); max-height:calc(100% - 24px); overflow:auto; padding:18px; background:var(--panel); border:1px solid rgba(255,255,255,.1); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(16px) saturate(120%); display:none; }
+    .panel.show { display:block; animation: drop .25s ease; }
+    @keyframes drop { from { transform: translate(-50%, calc(-50% - 12px)); opacity:0 } to { transform: translate(-50%, -50%); opacity:1 } }
+    .panel h1 { margin:0 0 8px; font-size: clamp(22px, 3.2vw, 32px); }
+    .panel h2 { margin:18px 0 8px; font-size: 18px; opacity:.9; }
+    .panel p { margin:8px 0; color:var(--muted); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+    .card { background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:14px; }
+    .slider { width:100%; }
+    label { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    input[type="range"]{ width:100%; }
+    input[type="checkbox"]{ width:18px; height:18px; }
+
+    /* Mobile controls */
+    .touch { position:absolute; inset:0; pointer-events:none; }
+    .stick, .firebtn { position:absolute; pointer-events:auto; touch-action:none; }
+    .stick { left:20px; bottom:24px; width:160px; height:160px; }
+    .firebtn { right:24px; bottom:34px; width:110px; height:110px; border-radius:50%; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,.35), rgba(255,255,255,.1)); border:1px solid rgba(255,255,255,.18); box-shadow: var(--shadow); display:grid; place-items:center; }
+    .firebtn span { font-weight:700; opacity:.9; }
+    .ring { position:absolute; left:0; top:0; right:0; bottom:0; border-radius:50%; border:2px dashed rgba(255,255,255,.25); }
+    .nub { position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,.25); border:1px solid rgba(255,255,255,.25); box-shadow: var(--shadow); }
+
+    /* Toast */
+    .toast { position:absolute; left:50%; bottom:max(14px, env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--panel); border:1px solid rgba(255,255,255,.12); padding:10px 14px; border-radius:999px; box-shadow:var(--shadow); backdrop-filter: blur(10px) saturate(110%); opacity:0; transition: opacity .2s ease, transform .2s ease; pointer-events:none; }
+    .toast.show { opacity:1; transform: translate(-50%, -6px); }
+
+    /* Badges */
+    .badge { padding:4px 8px; border-radius:999px; font-size:12px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); }
+    .accent { color: var(--accent); }
+    .accent2 { color: var(--accent-2); }
+    .danger { color: var(--danger); }
+    .gold { color: var(--gold); }
+
+    /* Links */
+    a { color: var(--accent-2); }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <canvas id="game" aria-label="Flux Arena game canvas" role="img"></canvas>
+    <div class="hud" aria-live="polite">
+      <div class="topbar">
+        <div class="pill brand" title="Flux Arena">⚡️ Flux Arena</div>
+        <div class="kpi pill" id="statsPill">
+          <div>Score: <span id="score">0</span></div>
+          <div>Best: <span id="best">0</span></div>
+          <div>HP: <span id="hp">100</span></div>
+          <div class="badge" id="fps">— FPS</div>
+        </div>
+        <div class="right">
+          <div class="seg" role="toolbar" aria-label="Game controls">
+            <button class="btn" id="btnPause" aria-pressed="false" title="Pause/Resume (P)">⏯ Pause</button>
+            <button class="btn" id="btnSettings" title="Settings (O)">⚙️ Settings</button>
+            <button class="btn" id="btnHelp" title="How to Play (H)">❔ Help</button>
+            <button class="btn" id="btnRestart" title="Restart (R)">🔁 Restart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panels -->
+    <section class="panel" id="panelHelp" role="dialog" aria-modal="true" aria-label="How to Play">
+      <h1>How to Play</h1>
+      <p>Survive as long as possible in the arena. Collect <span class="gold">⚚ Cores</span> to level up and choose perks. Enemies scale over time. This experience is 100% single‑file and asset‑free (procedural audio/FX). Works offline once loaded.</p>
+      <div class="grid">
+        <div class="card">
+          <h2>Desktop Controls</h2>
+          <ul>
+            <li><b>Move</b>: WASD / Arrow Keys</li>
+            <li><b>Aim</b>: Mouse</li>
+            <li><b>Fire</b>: Left Click / Space</li>
+            <li><b>Dash</b>: Shift</li>
+            <li><b>Pause</b>: P</li>
+            <li><b>Restart</b>: R</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Mobile Controls</h2>
+          <ul>
+            <li>Left joystick to move</li>
+            <li>Tap/hold <b>FIRE</b> to shoot</li>
+            <li>Double‑tap anywhere to dash</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Perks</h2>
+          <ul>
+            <li>Rate Up, Damage Up, Multi‑Shot, Orbitals, Magnet, Auto‑Aim, Shield</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Pro Tips</h2>
+          <ul>
+            <li>Keep momentum; kiting is king.</li>
+            <li>Use dash to break encirclement.</li>
+            <li>Perk into sustain (Magnet/Shield) for late game.</li>
+          </ul>
+        </div>
+      </div>
+      <p><small>Accessibility: honors <code>prefers-reduced-motion</code>, high‑contrast palette, scalable UI, screen‑reader labels, and keyboard‑first focus order.</small></p>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+        <button class="btn" onclick="closePanel('panelHelp')">Close</button>
+        <button class="btn" onclick="resumeGame()">Start</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panelSettings" role="dialog" aria-modal="true" aria-label="Settings">
+      <h1>Settings</h1>
+      <div class="grid">
+        <div class="card">
+          <h2>Audio</h2>
+          <label>Master Volume <input id="vol" class="slider" type="range" min="0" max="1" step=".01"></label>
+          <label><span>Mute</span> <input id="mute" type="checkbox"></label>
+        </div>
+        <div class="card">
+          <h2>Graphics</h2>
+          <label>Bloom <input id="bloom" type="checkbox" checked></label>
+          <label>Screen Shake <input id="shake" type="checkbox" checked></label>
+          <label>Particles <input id="particles" type="checkbox" checked></label>
+          <label>High DPI <input id="hidpi" type="checkbox" checked></label>
+          <label>Reduced Motion (OS) <span class="badge" id="rmState">auto</span></label>
+        </div>
+        <div class="card">
+          <h2>Gameplay</h2>
+          <label>Difficulty <input id="diff" class="slider" type="range" min="0" max="2" step="1"></label>
+          <label>Auto‑Fire <input id="autofire" type="checkbox" checked></label>
+          <label>Assist Aim <input id="assist" type="checkbox" checked></label>
+        </div>
+        <div class="card">
+          <h2>Persistence</h2>
+          <button class="btn" onclick="resetProgress()">Reset High Score</button>
+          <button class="btn" onclick="exportSettings()">Export Settings</button>
+          <input id="importFile" type="file" accept="application/json" style="display:none" />
+          <button class="btn" onclick="document.getElementById('importFile').click()">Import Settings</button>
+        </div>
+      </div>
+      <p><small>Changes are persisted to <code>localStorage</code>. No network calls. No tracking. Zero dependencies.</small></p>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+        <button class="btn" onclick="closePanel('panelSettings')">Close</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panelPerk" role="dialog" aria-modal="true" aria-label="Choose a Perk">
+      <h1>Level Up</h1>
+      <div class="grid" id="perkGrid"></div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+        <button class="btn" onclick="closePanel('panelPerk')">Skip</button>
+      </div>
+    </section>
+
+    <!-- Touch controls -->
+    <div class="touch" id="touch">
+      <div class="stick" id="stick" aria-hidden="true">
+        <div class="ring"></div>
+        <div class="nub" id="nub"></div>
+      </div>
+      <button class="firebtn" id="fire"><span>FIRE</span></button>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard</div>
+  </div>
+
+  <script>
+  // ===== Utility & Engine Primitives =====
+  const $ = sel => document.querySelector(sel);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const rand = (a=1, b=0) => Math.random()*(a-b)+b;
+  const randi = (a, b=0) => (Math.random()*((a|0)-(b|0)+1) + (b|0))|0;
+  const lerp = (a,b,t)=>a+(b-a)*t; const mix=lerp;
+  const dist = (ax,ay,bx,by)=>Math.hypot(ax-bx, ay-by);
+  const now = ()=>performance.now();
+  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Persistent state
+  const storage = {
+    get k(){return 'flux-arena';},
+    read(){ try { return JSON.parse(localStorage.getItem(this.k))||{} } catch { return {} } },
+    write(d){ localStorage.setItem(this.k, JSON.stringify(d)); },
+    merge(p){ this.write({...this.read(), ...p}); }
+  };
+
+  const S = Object.assign({
+    vol:.6, mute:false,
+    bloom:true, shake:true, particles:true, hidpi:true,
+    diff:1, autofire:true, assist:true,
+    best:0
+  }, storage.read());
+
+  // DOM wiring
+  const ui = {
+    score: $('#score'), best: $('#best'), hp: $('#hp'), fps: $('#fps'),
+    vol: $('#vol'), mute: $('#mute'), bloom: $('#bloom'), shake: $('#shake'), particles: $('#particles'), hidpi: $('#hidpi'), diff: $('#diff'), autofire: $('#autofire'), assist: $('#assist'), rmState: $('#rmState'),
+    panels: { help: $('#panelHelp'), settings: $('#panelSettings'), perk: $('#panelPerk') },
+    perkGrid: $('#perkGrid'),
+    toast: $('#toast'),
+    fire: $('#fire'), stick: $('#stick'), nub: $('#nub'),
+    buttons: { pause: $('#btnPause'), settings: $('#btnSettings'), help: $('#btnHelp'), restart: $('#btnRestart') }
+  };
+  ui.best.textContent = S.best|0;
+  ui.vol.value = S.vol; ui.mute.checked = !!S.mute; ui.bloom.checked = !!S.bloom; ui.shake.checked = !!S.shake; ui.particles.checked = !!S.particles; ui.hidpi.checked = !!S.hidpi; ui.diff.value = S.diff|0; ui.autofire.checked = !!S.autofire; ui.assist.checked = !!S.assist;
+  ui.rmState.textContent = prefersReduced ? 'on (OS)' : 'off (OS)';
+
+  // Canvas setup
+  const canvas = $('#game');
+  const ctx = canvas.getContext('2d', { alpha:false, desynchronized:true });
+  let W = 0, H = 0, DPR = 1;
+  const resize = ()=>{
+    DPR = (S.hidpi? devicePixelRatio: 1) || 1;
+    W = canvas.width = Math.floor(canvas.clientWidth * DPR);
+    H = canvas.height = Math.floor(canvas.clientHeight * DPR);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  };
+  addEventListener('resize', resize, {passive:true});
+  resize();
+
+  // Input
+  const input = { ax:0, ay:0, mx:0, my:0, fire:false, dash:false, paused:false };
+  addEventListener('mousemove', e=>{ const r=canvas.getBoundingClientRect(); input.mx=(e.clientX - r.left)*DPR; input.my=(e.clientY - r.top)*DPR; });
+  addEventListener('mousedown', e=>{ if(e.button===0) input.fire=true; });
+  addEventListener('mouseup', e=>{ if(e.button===0) input.fire=false; });
+  addEventListener('keydown', e=>{
+    if(['KeyW','ArrowUp'].includes(e.code)) input.ay=-1;
+    if(['KeyS','ArrowDown'].includes(e.code)) input.ay=1;
+    if(['KeyA','ArrowLeft'].includes(e.code)) input.ax=-1;
+    if(['KeyD','ArrowRight'].includes(e.code)) input.ax=1;
+    if(e.code==='Space') input.fire=true;
+    if(e.code==='ShiftLeft' || e.code==='ShiftRight') input.dash=true;
+    if(e.code==='KeyP') togglePause();
+    if(e.code==='KeyO') openPanel('panelSettings');
+    if(e.code==='KeyH') openPanel('panelHelp');
+    if(e.code==='KeyR') restart();
+  });
+  addEventListener('keyup', e=>{
+    if(['KeyW','ArrowUp','KeyS','ArrowDown'].includes(e.code)) input.ay= (e.code.includes('W')||e.code.includes('Up'))?0:0;
+    if(['KeyA','ArrowLeft','KeyD','ArrowRight'].includes(e.code)) input.ax=0;
+    if(e.code==='Space') input.fire=false;
+    if(e.code==='ShiftLeft' || e.code==='ShiftRight') input.dash=false;
+  });
+
+  // Touch controls
+  let touchId = null, doubleTapAt = 0;
+  const stickRect = ()=> ui.stick.getBoundingClientRect();
+  const placeNub = (dx,dy)=>{ ui.nub.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; };
+  const t2c = (x,y)=>{ const r=canvas.getBoundingClientRect(); return [(x-r.left)*DPR,(y-r.top)*DPR]; };
+  const onTouchStart = e=>{
+    for(const t of e.changedTouches){
+      const r = stickRect();
+      if(t.clientX < innerWidth*0.5){ // left half for stick
+        if(touchId==null){ touchId=t.identifier; ui.stick.style.opacity=1; }
+      } else { input.fire=true; }
+      const nowt = Date.now(); if (nowt - doubleTapAt < 250){ input.dash=true; setTimeout(()=>input.dash=false, 100); } doubleTapAt = nowt;
+    }
+  };
+  const onTouchMove = e=>{
+    for(const t of e.touches){ if(t.identifier===touchId){ const r = stickRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2; let dx=t.clientX-cx, dy=t.clientY-cy; const m=Math.hypot(dx,dy)||1; const lim=60; if(m>lim){ dx=dx/m*lim; dy=dy/m*lim; } placeNub(dx,dy); input.ax=dx/lim; input.ay=dy/lim; } }
+  };
+  const onTouchEnd = e=>{
+    for(const t of e.changedTouches){ if(t.identifier===touchId){ touchId=null; placeNub(0,0); input.ax=0; input.ay=0; ui.stick.style.opacity=1; } }
+    input.fire=false;
+  };
+  ui.touch = $('#touch');
+  ui.touch.addEventListener('touchstart', onTouchStart, {passive:true});
+  ui.touch.addEventListener('touchmove', onTouchMove, {passive:true});
+  ui.touch.addEventListener('touchend', onTouchEnd, {passive:true});
+  ui.fire.addEventListener('touchstart', ()=>{ input.fire=true; }, {passive:true});
+  ui.fire.addEventListener('touchend', ()=>{ input.fire=false; }, {passive:true});
+
+  // UI buttons
+  ui.buttons.pause.onclick = ()=> togglePause();
+  ui.buttons.settings.onclick = ()=> openPanel('panelSettings');
+  ui.buttons.help.onclick = ()=> openPanel('panelHelp');
+  ui.buttons.restart.onclick = ()=> restart();
+
+  // Panels
+  function openPanel(id){ ui.panels.help.classList.remove('show'); ui.panels.settings.classList.remove('show'); ui.panels.perk.classList.remove('show'); ui.panels[id.replace('panel','').toLowerCase()]?.classList?.add('show'); document.getElementById(id).classList.add('show'); input.paused=true; ui.buttons.pause.setAttribute('aria-pressed','true'); }
+  function closePanel(id){ document.getElementById(id).classList.remove('show'); input.paused=false; ui.buttons.pause.setAttribute('aria-pressed','false'); }
+  function togglePause(){ input.paused = !input.paused; ui.buttons.pause.setAttribute('aria-pressed', String(input.paused)); if(input.paused){ showToast('Paused'); } }
+  function resumeGame(){ closePanel('panelHelp'); input.paused=false; ui.buttons.pause.setAttribute('aria-pressed','false'); }
+
+  // Settings bindings
+  ui.vol.oninput = e=>{ S.vol = +e.target.value; persist(); };
+  ui.mute.onchange = e=>{ S.mute = e.target.checked; persist(); };
+  ui.bloom.onchange = e=>{ S.bloom = e.target.checked; persist(); };
+  ui.shake.onchange = e=>{ S.shake = e.target.checked; persist(); };
+  ui.particles.onchange = e=>{ S.particles = e.target.checked; persist(); };
+  ui.hidpi.onchange = e=>{ S.hidpi = e.target.checked; persist(); resize(); };
+  ui.diff.oninput = e=>{ S.diff = +e.target.value; persist(); };
+  ui.autofire.onchange = e=>{ S.autofire = e.target.checked; persist(); };
+  ui.assist.onchange = e=>{ S.assist = e.target.checked; persist(); };
+  $('#importFile').addEventListener('change', e=>{
+    const file=e.target.files[0]; if(!file) return; const fr=new FileReader(); fr.onload=()=>{ try{ const data=JSON.parse(fr.result); Object.assign(S,data); bindSettings(); persist(); showToast('Settings imported'); }catch{ showToast('Invalid file'); } }; fr.readAsText(file);
+  });
+
+  function bindSettings(){ ui.vol.value=S.vol; ui.mute.checked=S.mute; ui.bloom.checked=S.bloom; ui.shake.checked=S.shake; ui.particles.checked=S.particles; ui.hidpi.checked=S.hidpi; ui.diff.value=S.diff; ui.autofire.checked=S.autofire; ui.assist.checked=S.assist; ui.best.textContent=S.best|0; }
+  function exportSettings(){ const blob=new Blob([JSON.stringify(S,null,2)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='flux-settings.json'; a.click(); URL.revokeObjectURL(a.href); showToast('Exported settings'); }
+  function persist(){ storage.merge(S); }
+  function resetProgress(){ S.best=0; persist(); bindSettings(); showToast('High score reset'); }
+  function showToast(msg){ ui.toast.textContent=msg; ui.toast.classList.add('show'); clearTimeout(showToast.t); showToast.t=setTimeout(()=>ui.toast.classList.remove('show'), 1600); }
+
+  // ===== Audio (Procedural, no assets) =====
+  const Audio = (()=>{
+    const AC = window.AudioContext||window.webkitAudioContext; const ctxA = new AC();
+    const master = ctxA.createGain(); master.gain.value = S.mute?0:S.vol; master.connect(ctxA.destination);
+    const setVol = ()=> master.gain.value = S.mute?0:S.vol;
+    const env = (node, a=.002, d=.1, s=.0, r=.12, v=.8)=>{ const t=ctxA.currentTime; node.gain.cancelScheduledValues(t); node.gain.setValueAtTime(0, t); node.gain.linearRampToValueAtTime(v, t+a); node.gain.linearRampToValueAtTime(s*v, t+a+d); node.gain.linearRampToValueAtTime(0, t+a+d+r); };
+    const tone = (freq=440, type='sine', dur=.2, a=.002, d=.08, s=.0, r=.12, v=.6)=>{ const o=ctxA.createOscillator(); const g=ctxA.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(master); env(g,a,d,s,r,v); o.start(); o.stop(ctxA.currentTime+dur+a+d+r+.02); return {o,g}; };
+    const click = ()=>{ const f= randi(1800,2200); tone(f,'square',.05,.001,.03,0,.05,.25); };
+    const shoot = ()=>{ const f= randi(380,520); tone(f,'sawtooth',.12,.002,.06,0,.05,.35); };
+    const hit = ()=>{ const f= randi(120,180); tone(f,'triangle',.2,.002,.08,0,.14,.5); };
+    const boom = ()=>{ const o=ctxA.createOscillator(), g=ctxA.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(90, ctxA.currentTime); o.frequency.exponentialRampToValueAtTime(40, ctxA.currentTime+.35); o.connect(g); g.connect(master); env(g,.005,.12,0,.25,.8); o.start(); o.stop(ctxA.currentTime+.6); };
+    const level = ()=>{ tone(660,'triangle',.2,.005,.08,0,.12,.5); tone(990,'triangle',.2,.005,.08,0,.12,.45); };
+    const heal = ()=>{ tone(1200,'sine',.2,.003,.12,0,.12,.35); };
+    return { setVol, click, shoot, hit, boom, level, heal, ctx:ctxA, master };
+  })();
+
+  // Reflect audio settings
+  const syncVolume = ()=>{ Audio.master.gain.value = S.mute?0:S.vol; };
+  ui.vol.addEventListener('input', syncVolume); ui.mute.addEventListener('change', syncVolume);
+
+  // ===== Game Model =====
+  const G = {
+    time:0, dt:0, last:now(),
+    score:0, level:1, xp:0, xpn:40,
+    player:null, bullets:[], enemies:[], parts:[], orbs:[], cores:[], perks:[],
+    over:false, shakeT:0
+  };
+
+  function restart(){ Object.assign(G, { time:0, dt:0, last:now(), score:0, level:1, xp:0, xpn:40, bullets:[], enemies:[], parts:[], orbs:[], cores:[], over:false, shakeT:0 });
+    P = newPlayer(); spawnWave(true); input.paused=false; ui.buttons.pause.setAttribute('aria-pressed','false'); showToast('New run'); }
+
+  function newPlayer(){ return { x:W/2, y:H/2, r:14, speed: 240, vx:0, vy:0, hp:100, hpMax:100, cd:0, fireRate:.18, dmg:10, multi:1, dashC:0, dashCD:1.4, dashPow:680, magnet:100, shield:0, auto:true, assist:true, orbital:0 }; }
+  let P = newPlayer();
+
+  function spawnWave(first=false){
+    const n = first? 6 : Math.min(6+G.level*2, 60);
+    for(let i=0;i<n;i++) spawnEnemy();
+  }
+  function spawnEnemy(){
+    const side = randi(3);
+    const margin = 40*DPR;
+    const x = side===0? -margin : side===1? W+margin : rand(W);
+    const y = side===2? -margin : rand(H);
+    const t = ['chaser','brute','sniper'][randi(2)];
+    const hp = t==='brute'? 70+G.level*8 : t==='sniper'? 35+G.level*4 : 40+G.level*5;
+    const sp = t==='brute'? 60+G.level*2 : t==='sniper'? 120+G.level*4 : 100+G.level*3;
+    G.enemies.push({ x,y, vx:0, vy:0, r: t==='brute'? 20:14, type:t, hp, max:hp, sp, cd: rand(1), score: t==='brute'? 30: (t==='sniper'? 35:25) });
+  }
+
+  function fireBullet(ax, ay){ const ang = Math.atan2(ay - P.y, ax - P.x); const spread = 0.1; for(let i=0;i<P.multi;i++){ const a = ang + (i - (P.multi-1)/2)*spread; const sp=460; G.bullets.push({ x:P.x, y:P.y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, r:4, life: 1.2, dmg:P.dmg }); }
+    Audio.shoot(); }
+
+  function explode(x,y,c=20){ for(let i=0;i<c;i++){ const a=rand(Math.PI*2), s=rand(60,240); G.parts.push({ x,y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, r: rand(1,3), life: rand(.3,.9) }); } }
+
+  function dropCore(x,y){ G.cores.push({x,y,r:6,vx:rand(-30,30),vy:rand(-30,30)}); }
+
+  // Perks
+  const perkCatalog = [
+    { id:'rate', name:'Rate Up', desc:'-15% fire cooldown', apply:()=> P.fireRate = Math.max(.06, P.fireRate*0.85) },
+    { id:'dmg', name:'Damage Up', desc:'+25% bullet damage', apply:()=> P.dmg = Math.round(P.dmg*1.25) },
+    { id:'multi', name:'Multi‑Shot', desc:'+1 projectile (spread)', apply:()=> P.multi = Math.min(6, P.multi+1) },
+    { id:'orb', name:'Orbitals', desc:'Add 1 rotating blade', apply:()=> P.orbital = Math.min(5, P.orbital+1) },
+    { id:'mag', name:'Magnet', desc:'+60px pickup radius', apply:()=> P.magnet += 60 },
+    { id:'shield', name:'Shield', desc:'+25 shield HP (auto‑recharge)', apply:()=> P.shield += 25 },
+    { id:'heal', name:'Heal', desc:'Restore 30 HP', apply:()=> P.hp = Math.min(P.hpMax, P.hp+30) },
+    { id:'auto', name:'Auto‑Aim', desc:'Bullets slightly track', apply:()=> P.assist = true },
+  ];
+
+  function levelUp(){ G.level++; G.xp=0; G.xpn = Math.round(G.xpn*1.22); openPerk(); Audio.level(); showToast(`Level ${G.level}`); }
+  function openPerk(){ ui.perkGrid.innerHTML=''; const picks=[...perkCatalog].sort(()=>Math.random()-.5).slice(0,3); for(const p of picks){ const el=document.createElement('button'); el.className='btn'; el.style.justifyContent='space-between'; el.innerHTML=`<div style="text-align:left"><div style="font-weight:700">${p.name}</div><div style="font-size:12px; opacity:.8">${p.desc}</div></div><span class="badge">Pick</span>`; el.onclick=()=>{ p.apply(); closePanel('panelPerk'); }; ui.perkGrid.appendChild(el); } openPanel('panelPerk'); }
+
+  // ===== Game Loop =====
+  function step(){
+    const t = now(); G.dt = Math.min(0.033, (t - G.last)/1000); G.last = t; if(input.paused || G.over) { draw(); requestAnimationFrame(step); return; }
+    G.time += G.dt;
+
+    // Player integration
+    const accel = 900; const fric = 7; const maxv = P.speed*(1 + G.level*0.02);
+    P.vx += input.ax*accel*G.dt; P.vy += input.ay*accel*G.dt;
+    P.vx -= P.vx*fric*G.dt; P.vy -= P.vy*fric*G.dt;
+    if(input.dash && P.dashC<=0){ const m = Math.hypot(input.ax, input.ay) || 1; P.vx += (input.ax/m)*P.dashPow; P.vy += (input.ay/m)*P.dashPow; P.dashC = P.dashCD; if(S.shake) G.shakeT = .25; input.dash=false; Audio.click(); }
+    P.dashC -= G.dt;
+    const spd = Math.hypot(P.vx,P.vy); if(spd>maxv){ const k=maxv/spd; P.vx*=k; P.vy*=k; }
+    P.x = clamp(P.x + P.vx*G.dt, P.r, W-P.r); P.y = clamp(P.y + P.vy*G.dt, P.r, H-P.r);
+
+    // Aim target
+    const aimx = input.mx||W/2, aimy = input.my||H/2;
+    P.cd -= G.dt;
+    const wantsFire = input.fire || (S.autofire && true);
+    if(wantsFire && P.cd<=0){ P.cd = P.fireRate; fireBullet(aimx, aimy); }
+
+    // Orbitals
+    if(P.orbital>0){ if(!G.orbs.length){ for(let i=0;i<P.orbital;i++) G.orbs.push({a:i, r:36, t:0}); } while(G.orbs.length<P.orbital) G.orbs.push({a:G.orbs.length, r:36, t:0}); while(G.orbs.length>P.orbital) G.orbs.pop(); for(const o of G.orbs){ o.t += 2.2*G.dt; }
+    } else G.orbs.length=0;
+
+    // Bullets
+    for(let i=G.bullets.length-1;i>=0;i--){ const b=G.bullets[i];
+      // slight homing if assist
+      if(S.assist){ let closest=null, cd=999999; for(const e of G.enemies){ const d=dist(b.x,b.y,e.x,e.y); if(d<cd){ cd=d; closest=e; } } if(closest){ const a=Math.atan2(closest.y-b.y, closest.x-b.x); b.vx = mix(b.vx, Math.cos(a)*480, .08); b.vy = mix(b.vy, Math.sin(a)*480, .08); }
+      }
+      b.x += b.vx*G.dt; b.y += b.vy*G.dt; b.life -= G.dt; if(b.life<=0 || b.x<-10 || b.y<-10 || b.x>W+10 || b.y>H+10){ G.bullets.splice(i,1); continue; }
+    }
+
+    // Enemies
+    const diffMul = [0.8,1,1.25][S.diff|0];
+    if(G.time% (2.8/diffMul) < G.dt) spawnWave();
+    for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i];
+      const a = Math.atan2(P.y-e.y, P.x-e.x); e.vx = Math.cos(a)*e.sp*diffMul; e.vy = Math.sin(a)*e.sp*diffMul; e.x += e.vx*G.dt; e.y += e.vy*G.dt;
+      // enemy special
+      e.cd -= G.dt; if(e.type==='sniper' && e.cd<=0){ e.cd=1.8; // shoot towards player
+        const sp=240+G.level*8; const bx=e.x, by=e.y; const ang=a; G.parts.push({x:bx,y:by,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:3,life:2,enemy:true,dmg:10+G.level*2}); }
+      // collide with player
+      if(dist(e.x,e.y,P.x,P.y) < e.r + P.r){ const d=8*diffMul; hurt(d); e.x -= Math.cos(a)*8; e.y -= Math.sin(a)*8; }
+    }
+
+    // Enemy bullets (reusing parts with enemy flag)
+    for(let i=G.parts.length-1;i>=0;i--){ const p=G.parts[i]; p.x += (p.vx||0)*G.dt; p.y += (p.vy||0)*G.dt; p.life -= G.dt; if(p.enemy && dist(p.x,p.y,P.x,P.y)< P.r+3){ hurt(p.dmg||10); G.parts.splice(i,1); continue; } if(p.life<=0) { G.parts.splice(i,1); }
+    }
+
+    // Collisions bullets -> enemies
+    for(let i=G.bullets.length-1;i>=0;i--){ const b=G.bullets[i]; for(let j=G.enemies.length-1;j>=0;j--){ const e=G.enemies[j]; if(dist(b.x,b.y,e.x,e.y) < b.r + e.r){ e.hp -= b.dmg; G.bullets.splice(i,1); spawnSpark(b.x,b.y); if(e.hp<=0){ killEnemy(j); } break; } } }
+
+    // Orbs damage
+    for(const o of G.orbs){ const ox=P.x+Math.cos(o.t + o.a*6.283/P.orbital)* (P.r+o.r), oy=P.y+Math.sin(o.t + o.a*6.283/P.orbital)*(P.r+o.r); for(let j=G.enemies.length-1;j>=0;j--){ const e=G.enemies[j]; if(dist(ox,oy,e.x,e.y)< e.r+6){ e.hp -= 30*G.dt; if(e.hp<=0){ killEnemy(j); } } }
+    }
+
+    // Cores (XP)
+    for(let i=G.cores.length-1;i>=0;i--){ const c=G.cores[i]; const d = dist(c.x,c.y,P.x,P.y); const mag = P.magnet; if(d<mag){ const a=Math.atan2(P.y-c.y,P.x-c.x); c.vx = Math.cos(a)*200; c.vy = Math.sin(a)*200; } c.x += (c.vx||0)*G.dt; c.y += (c.vy||0)*G.dt; if(d < P.r+8){ G.cores.splice(i,1); G.xp++; G.score+=3; if(G.xp>=G.xpn) levelUp(); Audio.heal(); }
+    }
+
+    // Score decay/add
+    G.score += G.dt*2;
+
+    // UI sync
+    ui.score.textContent = Math.floor(G.score);
+    ui.hp.textContent = Math.max(0, Math.ceil(P.hp));
+    if(G.score > (S.best||0)){ S.best = Math.floor(G.score); ui.best.textContent = S.best; persist(); }
+
+    draw(); requestAnimationFrame(step);
+  }
+
+  function killEnemy(idx){ const e=G.enemies[idx]; G.enemies.splice(idx,1); explode(e.x,e.y, S.particles? 28: 10); Audio.hit(); if(Math.random()<.9) dropCore(e.x,e.y); G.score += e.score; if(S.shake) G.shakeT=.15; }
+  function hurt(amt){ if(P.shield>0){ const s=Math.min(P.shield, amt); P.shield-=s; amt-=s; } if(amt>0){ P.hp-=amt; screenFlash(amt); if(P.hp<=0) gameOver(); } }
+  function gameOver(){ G.over=true; Audio.boom(); showToast('Game Over — press R to retry'); }
+
+  function spawnSpark(x,y){ if(!S.particles) return; for(let i=0;i<10;i++){ const a=rand(Math.PI*2), s=rand(120,300); G.parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:rand(1,2),life:rand(.2,.6)}); } }
+
+  // Flash & camera shake
+  let flashT=0; function screenFlash(a){ flashT = Math.min(1, flashT + a/100); }
+
+  // ===== Rendering =====
+  function draw(){
+    // camera shake
+    const sx = S.shake && G.shakeT>0 ? (Math.random()*2-1)*12*DPR*G.shakeT : 0; const sy = S.shake && G.shakeT>0 ? (Math.random()*2-1)*12*DPR*G.shakeT : 0; G.shakeT = Math.max(0, G.shakeT - G.dt*2.5);
+
+    // backdrop grid
+    ctx.save(); ctx.clearRect(0,0,W,H);
+    const t = G.time*0.6; const grid=40*DPR; ctx.globalAlpha=.8; ctx.fillStyle = '#070910'; ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=.5; ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(124, 247, 212, .08)'; ctx.beginPath(); for(let x=((t*30)%grid); x<W; x+=grid){ ctx.moveTo(x+sx,0+sy); ctx.lineTo(x+sx,H+sy); } for(let y=((t*20)%grid); y<H; y+=grid){ ctx.moveTo(0+sx,y+sy); ctx.lineTo(W+sx,y+sy); } ctx.stroke();
+    ctx.globalAlpha=1;
+
+    // Cores
+    for(const c of G.cores){ drawGlow(c.x+sx,c.y+sy, 10, 'rgba(255, 209, 102, .9)'); circle(c.x+sx,c.y+sy, c.r, '#ffd166'); }
+
+    // Bullets
+    for(const b of G.bullets){ drawGlow(b.x+sx,b.y+sy, 8, 'rgba(124,247,212,.8)'); circle(b.x+sx,b.y+sy,b.r,'#7cf7d4'); }
+
+    // Enemy shots & particles
+    for(const p of G.parts){ const col = p.enemy? '#ff5d7a' : '#7db2ff'; if(S.bloom) drawGlow(p.x+sx,p.y+sy, p.enemy?10:6, p.enemy?'rgba(255,93,122,.8)':'rgba(125,178,255,.7)'); circle(p.x+sx,p.y+sy,p.r,col); }
+
+    // Enemies
+    for(const e of G.enemies){ const col = e.type==='brute'? '#7db2ff' : e.type==='sniper'? '#ff7dc4' : '#ffd166'; if(S.bloom) drawGlow(e.x+sx,e.y+sy, e.r*1.6, col+'88'); circle(e.x+sx,e.y+sy,e.r,col); // HP bar
+      ctx.fillStyle='rgba(0,0,0,.45)'; ctx.fillRect(e.x-e.r+sx, e.y-e.r-10+sy, e.r*2, 4);
+      ctx.fillStyle='#16a34a'; ctx.fillRect(e.x-e.r+sx, e.y-e.r-10+sy, (e.hp/e.max)*e.r*2, 4);
+    }
+
+    // Player
+    if(S.bloom) drawGlow(P.x+sx,P.y+sy, P.r*2.2, 'rgba(124, 247, 212, .6)'); circle(P.x+sx,P.y+sy,P.r,'#e9ecf1');
+    // Shield aura
+    if(P.shield>0){ ctx.strokeStyle='rgba(125,178,255,.7)'; ctx.beginPath(); ctx.arc(P.x+sx,P.y+sy,P.r+8,0,Math.PI*2); ctx.stroke(); }
+    // Orbitals
+    for(const o of G.orbs){ const ox=P.x+Math.cos(o.t + o.a*6.283/P.orbital)* (P.r+o.r), oy=P.y+Math.sin(o.t + o.a*6.283/P.orbital)*(P.r+o.r); if(S.bloom) drawGlow(ox+sx,oy+sy, 9, 'rgba(255,93,122,.7)'); circle(ox+sx,oy+sy,6,'#ff5d7a'); }
+
+    // HUD bars
+    drawBars();
+
+    // Flash overlay
+    if(flashT>0){ ctx.fillStyle = `rgba(255,93,122,${flashT*.25})`; ctx.fillRect(0,0,W,H); flashT = Math.max(0, flashT - G.dt*2); }
+
+    ctx.restore();
+
+    // FPS
+    drawFPS();
+  }
+
+  function drawBars(){
+    const pad=18*DPR, w = 240*DPR, h=10*DPR;
+    // XP bar
+    ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(pad, H-pad-h, w, h);
+    ctx.fillStyle='#7db2ff'; ctx.fillRect(pad, H-pad-h, (G.xp/G.xpn)*w, h);
+    // Dash bar
+    ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(pad, H-pad-h*3, w, h);
+    ctx.fillStyle='#ffd166'; ctx.fillRect(pad, H-pad-h*3, (1 - clamp(P.dashC/P.dashCD,0,1))*w, h);
+  }
+
+  function circle(x,y,r,fill){ ctx.beginPath(); ctx.fillStyle=fill; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+  function drawGlow(x,y,rad,col){ if(!S.bloom) return; const g=ctx.createRadialGradient(x,y,0,x,y,rad); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.globalCompositeOperation='lighter'; ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2); ctx.fill(); ctx.globalCompositeOperation='source-over'; }
+
+  // FPS monitor (lightweight)
+  let fpsS=now(), fpsC=0; function drawFPS(){ fpsC++; if(now()-fpsS>500){ const fps = Math.round((fpsC*1000)/(now()-fpsS)); ui.fps.textContent = fps+" FPS"; fpsC=0; fpsS=now(); } }
+
+  // ===== Init =====
+  openPanel('panelHelp');
+  requestAnimationFrame(step);
+
+  // ===== Accessibility niceties =====
+  // Pause on tab blur
+  addEventListener('visibilitychange', ()=>{ if(document.hidden){ input.paused=true; ui.buttons.pause.setAttribute('aria-pressed','true'); } });
+
+  // ===== Public helpers for buttons =====
+  window.closePanel = closePanel;
+  window.resumeGame = resumeGame;
+  window.resetProgress = resetProgress;
+  window.exportSettings = exportSettings;
+  window.restart = restart;
+
+  </script>
+</body>
+</html>
