@@ -44,7 +44,7 @@
     .chip strong{ color:var(--primary); }
     .chip .dot{ width:10px; height:10px; border-radius:50%; background:var(--good); box-shadow: 0 0 10px 2px #7cff7c55;}
     .spacer{ flex:1; }
-    .btn{ pointer-events:auto; user-select:none; -webkit-user-select:none; padding:10px 14px; border-radius:12px; border:1px solid #2b3552; background: linear-gradient(#12192b, #0e1425); color:var(--text); cursor:pointer; transition:.15s transform, .2s background; font-weight:600; letter-spacing:.2px; touch-action: manipulation; }
+  .btn{ pointer-events:auto; user-select:none; -webkit-user-select:none; padding:10px 14px; min-height:48px; border-radius:12px; border:1px solid #2b3552; background: linear-gradient(#12192b, #0e1425); color:var(--text); cursor:pointer; transition:.15s transform, .2s background; font-weight:600; letter-spacing:.2px; touch-action: manipulation; }
     @media (hover:hover) and (pointer:fine){
       .btn:hover{ transform: translateY(-1px); filter: var(--glow); }
     }
@@ -52,7 +52,7 @@
     .btn.accent{ background: linear-gradient(180deg, #2a0f28, #1d0b1b); border-color:#58224f; color: #ffd9f5; }
     .icon{ filter: var(--glow); }
 
-  .panel{ position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:15; padding: calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); box-sizing: border-box; }
+  .panel{ position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:30; padding: calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); box-sizing: border-box; }
     .card{ pointer-events:auto; width:min(800px, 92vw); max-height: 85vh; overflow:auto; border-radius: 18px; background: var(--panel-strong); border:1px solid #2a3552; box-shadow: 0 20px 60px #0009; padding: 22px 22px 18px; }
     .title{ font-size: clamp(28px, 3.4vw, 42px); margin:0 0 8px; letter-spacing:0.5px; }
     .sub{ color:var(--muted); margin:0 0 14px; }
@@ -92,13 +92,19 @@
 
     /* Responsive tweaks */
     @media (max-width: 600px){
+  body{ font-size:18px; }
       .hud{ top: 8px; left: 8px; right: 8px; gap:8px; }
       .chip{ padding:8px 10px; font-size:14px; }
-      .btn{ padding:10px 12px; font-size:14px; }
+  .btn{ padding:10px 12px; font-size:16px; min-height:48px; }
+  .title{ font-size: clamp(30px, 6vw, 40px); }
       .card{ width:min(720px, 96vw); max-height: calc(92dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding:18px; }
       .grid{ grid-template-columns: 1fr; }
   .panel .row{ width:100%; }
   .panel .row .btn{ flex:1 1 auto; }
+  /* Panel menu CTAs centered and wide */
+  #panelMenu .row{ justify-content: center !important; }
+  #panelMenu .row > .row{ width:100%; }
+  #panelMenu .row > .row .btn{ flex:1 1 48%; }
       .touch .stick, .touch .fireBtn{ width:32vw; height:32vw; min-width:120px; min-height:120px; bottom: calc(16px + env(safe-area-inset-bottom)); }
       .stick{ left: calc(12px + env(safe-area-inset-left)); }
       .fireBtn{ right: calc(12px + env(safe-area-inset-right)); }
@@ -321,9 +327,9 @@
       setTimeout(()=>{ t.style.transition='opacity .3s, transform .3s'; t.style.opacity='0'; t.style.transform='translateY(-6px)'; setTimeout(()=>t.remove(), 350); }, ms);
     }
 
-    // Panels helpers
-    function show(el){ el.hidden=false; }
-    function hide(el){ el.hidden=true; }
+  // Panels helpers
+  function show(el){ el.hidden=false; updateTouchVisibility?.(); }
+  function hide(el){ el.hidden=true; updateTouchVisibility?.(); }
 
     // Buttons
     $('#btnStart').addEventListener('click', ()=>{ sfx.start(); hide(panels.menu); startGame(); });
@@ -359,9 +365,10 @@
     });
 
     // Touch virtual controls
-  const touchUI=$('#touch'); const stickL=$('#stickL'); const fireBtn=$('#btnFire'); const nub=stickL.querySelector('.nub');
+    const touchUI=$('#touch'); const stickL=$('#stickL'); const fireBtn=$('#btnFire'); const nub=stickL.querySelector('.nub');
   const touchActive = ()=> ('ontouchstart' in window) || navigator.maxTouchPoints>0 || matchMedia('(pointer: coarse)').matches;
-    const updateTouchVisibility=()=>{ touchUI.style.display = touchActive()? 'block' : 'none'; };
+    const anyPanelOpen=()=> !panels.menu.hidden || !panels.help.hidden || !panels.settings.hidden || !panels.over.hidden;
+    const updateTouchVisibility=()=>{ touchUI.style.display = (touchActive() && !anyPanelOpen())? 'block' : 'none'; };
     updateTouchVisibility();
     window.addEventListener('resize', updateTouchVisibility);
 
