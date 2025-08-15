@@ -52,7 +52,7 @@
     .btn.accent{ background: linear-gradient(180deg, #2a0f28, #1d0b1b); border-color:#58224f; color: #ffd9f5; }
     .icon{ filter: var(--glow); }
 
-  .panel{ position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:15; }
+  .panel{ position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:15; padding: calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); box-sizing: border-box; }
     .card{ pointer-events:auto; width:min(800px, 92vw); max-height: 85vh; overflow:auto; border-radius: 18px; background: var(--panel-strong); border:1px solid #2a3552; box-shadow: 0 20px 60px #0009; padding: 22px 22px 18px; }
     .title{ font-size: clamp(28px, 3.4vw, 42px); margin:0 0 8px; letter-spacing:0.5px; }
     .sub{ color:var(--muted); margin:0 0 14px; }
@@ -97,6 +97,8 @@
       .btn{ padding:10px 12px; font-size:14px; }
       .card{ width:min(720px, 96vw); max-height: calc(92dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding:18px; }
       .grid{ grid-template-columns: 1fr; }
+  .panel .row{ width:100%; }
+  .panel .row .btn{ flex:1 1 auto; }
       .touch .stick, .touch .fireBtn{ width:32vw; height:32vw; min-width:120px; min-height:120px; bottom: calc(16px + env(safe-area-inset-bottom)); }
       .stick{ left: calc(12px + env(safe-area-inset-left)); }
       .fireBtn{ right: calc(12px + env(safe-area-inset-right)); }
