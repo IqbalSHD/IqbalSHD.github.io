@@ -38,7 +38,7 @@
       radial-gradient(1200px 1200px at 50% 50%, #0b0f1f 0, #0a0d16 40%, #090a10 80%);
       filter: contrast(1.1) saturate(1.1); image-rendering:auto; touch-action:none;
     }
-    .ui{ position:fixed; inset:0; pointer-events:none; }
+  .ui{ position:fixed; inset:0; pointer-events:none; z-index:10; }
     .hud{ position: fixed; top: 16px; left: 16px; right: 16px; display:flex; gap:12px; align-items:center; pointer-events:none; flex-wrap: wrap; row-gap:8px; padding-top: env(safe-area-inset-top); }
     .chip{ backdrop-filter: blur(10px); background: var(--panel); border:1px solid #26304b; border-radius: var(--radius); padding:10px 12px; display:inline-flex; gap:10px; align-items:center; pointer-events:auto; }
     .chip strong{ color:var(--primary); }
@@ -52,7 +52,7 @@
     .btn.accent{ background: linear-gradient(180deg, #2a0f28, #1d0b1b); border-color:#58224f; color: #ffd9f5; }
     .icon{ filter: var(--glow); }
 
-    .panel{ position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; }
+  .panel{ position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:15; }
     .card{ pointer-events:auto; width:min(800px, 92vw); max-height: 85vh; overflow:auto; border-radius: 18px; background: var(--panel-strong); border:1px solid #2a3552; box-shadow: 0 20px 60px #0009; padding: 22px 22px 18px; }
     .title{ font-size: clamp(28px, 3.4vw, 42px); margin:0 0 8px; letter-spacing:0.5px; }
     .sub{ color:var(--muted); margin:0 0 14px; }
@@ -70,18 +70,18 @@
   .bottom-right{ position:fixed; right:16px; bottom:16px; display:flex; gap:8px; padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); }
 
     /* Mobile virtual controls */
-    .touch{ position:fixed; inset:0; pointer-events:none; }
+  .touch{ position:fixed; inset:0; pointer-events:none; z-index:20; }
   .stick, .fireBtn{ position:fixed; bottom:calc(24px + env(safe-area-inset-bottom)); width:28vw; max-width:220px; height:28vw; max-height:220px; border-radius:50%; background:#0d1223aa; border:1px solid #223050; pointer-events:auto; touch-action:none; -webkit-user-select:none; user-select:none; }
   .stick{ left:calc(24px + env(safe-area-inset-left)); }
   .fireBtn{ right:calc(24px + env(safe-area-inset-right)); display:grid; place-items:center; font-weight:900; color:#ffd9f5; border-color:#572a4d; background:#1a0e1caa; }
     .nub{ position:absolute; left:50%; top:50%; width:38%; height:38%; transform:translate(-50%,-50%); border-radius:50%; background:#132036; border:1px solid #2b3b63; box-shadow: inset 0 0 40px #0008; }
 
     /* Toasts */
-  .toasts{ position:fixed; left:50%; top:16px; transform:translateX(-50%); display:grid; gap:8px; width: min(92vw, 600px); pointer-events:none; padding-top: env(safe-area-inset-top); }
+  .toasts{ position:fixed; left:50%; top:16px; transform:translateX(-50%); display:grid; gap:8px; width: min(92vw, 600px); pointer-events:none; padding-top: env(safe-area-inset-top); z-index:18; }
     .toast{ backdrop-filter: blur(8px); background:#0d1426dd; border:1px solid #2b3552; border-left:4px solid var(--accent); padding:10px 12px; border-radius:12px; }
 
     /* Scanline overlay subtle */
-    .scan{ position:fixed; inset:0; background: repeating-linear-gradient(0deg, transparent, transparent 6px, #ffffff03 7px, transparent 8px); mix-blend-mode: soft-light; pointer-events:none; }
+  .scan{ position:fixed; inset:0; background: repeating-linear-gradient(0deg, transparent, transparent 6px, #ffffff03 7px, transparent 8px); mix-blend-mode: soft-light; pointer-events:none; z-index:5; }
 
     /* Links */
     a{ color:#aee8ff; text-decoration-thickness: 2px; text-underline-offset: 3px; }
@@ -357,8 +357,8 @@
     });
 
     // Touch virtual controls
-    const touchUI=$('#touch'); const stickL=$('#stickL'); const fireBtn=$('#btnFire'); const nub=stickL.querySelector('.nub');
-    const touchActive = ()=> matchMedia('(pointer: coarse)').matches;
+  const touchUI=$('#touch'); const stickL=$('#stickL'); const fireBtn=$('#btnFire'); const nub=stickL.querySelector('.nub');
+  const touchActive = ()=> ('ontouchstart' in window) || navigator.maxTouchPoints>0 || matchMedia('(pointer: coarse)').matches;
     const updateTouchVisibility=()=>{ touchUI.style.display = touchActive()? 'block' : 'none'; };
     updateTouchVisibility();
     window.addEventListener('resize', updateTouchVisibility);
@@ -366,14 +366,27 @@
     let stickId=null; let stickOrigin=null;
     function updateNub(dx,dy,r=1){ const m=Math.hypot(dx,dy); const lim=(stickL.clientWidth*0.38*0.7); const s= m>0? Math.min(m,lim)/m :0; const x=dx*s, y=dy*s; nub.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`; }
 
-  stickL.addEventListener('pointerdown', e=>{ e.preventDefault(); stickId=e.pointerId; stickOrigin={x:e.clientX,y:e.clientY}; input.touch.active=true; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); stickL.setPointerCapture(stickId); });
-  stickL.addEventListener('pointermove', e=>{ if(e.pointerId!==stickId) return; e.preventDefault(); const dx=e.clientX-stickOrigin.x; const dy=e.clientY-stickOrigin.y; input.touch.dx=dx; input.touch.dy=dy; updateNub(dx,dy); });
+  // Pointer Events (modern)
+  stickL.addEventListener('pointerdown', e=>{ e.preventDefault(); stickId=e.pointerId; stickOrigin={x:e.clientX,y:e.clientY}; input.touch.active=true; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); stickL.setPointerCapture(stickId); }, {passive:false});
+  stickL.addEventListener('pointermove', e=>{ if(e.pointerId!==stickId) return; e.preventDefault(); const dx=e.clientX-stickOrigin.x; const dy=e.clientY-stickOrigin.y; input.touch.dx=dx; input.touch.dy=dy; updateNub(dx,dy); }, {passive:false});
     const endStick=()=>{ stickId=null; input.touch.active=false; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); };
-  stickL.addEventListener('pointerup', e=>{ e.preventDefault(); endStick(); }); stickL.addEventListener('pointercancel', endStick); stickL.addEventListener('lostpointercapture', endStick);
+  stickL.addEventListener('pointerup', e=>{ e.preventDefault(); endStick(); }, {passive:false}); stickL.addEventListener('pointercancel', endStick); stickL.addEventListener('lostpointercapture', endStick);
 
-  fireBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); fireBtn.setPointerCapture(e.pointerId); input.touch.fire=true; input.shoot=true; });
+  fireBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); fireBtn.setPointerCapture(e.pointerId); input.touch.fire=true; input.shoot=true; }, {passive:false});
   const endFire=()=>{ input.touch.fire=false; input.shoot=false; };
-  fireBtn.addEventListener('pointerup', e=>{ e.preventDefault(); endFire(); }); fireBtn.addEventListener('pointercancel', endFire); fireBtn.addEventListener('lostpointercapture', endFire);
+  fireBtn.addEventListener('pointerup', e=>{ e.preventDefault(); endFire(); }, {passive:false}); fireBtn.addEventListener('pointercancel', endFire); fireBtn.addEventListener('lostpointercapture', endFire);
+
+  // Touch Events fallback (older browsers or when pointer events are off)
+  if(!window.PointerEvent){
+    stickL.addEventListener('touchstart', e=>{ const t=e.changedTouches[0]; if(!t) return; e.preventDefault(); stickOrigin={x:t.clientX,y:t.clientY}; input.touch.active=true; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); }, {passive:false});
+    stickL.addEventListener('touchmove', e=>{ const t=e.changedTouches[0]; if(!t) return; e.preventDefault(); const dx=t.clientX-stickOrigin.x; const dy=t.clientY-stickOrigin.y; input.touch.dx=dx; input.touch.dy=dy; updateNub(dx,dy); }, {passive:false});
+    stickL.addEventListener('touchend', e=>{ e.preventDefault(); endStick(); }, {passive:false});
+    stickL.addEventListener('touchcancel', e=>{ endStick(); });
+
+    fireBtn.addEventListener('touchstart', e=>{ e.preventDefault(); input.touch.fire=true; input.shoot=true; }, {passive:false});
+    fireBtn.addEventListener('touchend', e=>{ e.preventDefault(); endFire(); }, {passive:false});
+    fireBtn.addEventListener('touchcancel', e=>{ endFire(); });
+  }
 
   // Prevent iOS/Android double-tap zoom on buttons
   document.addEventListener('gesturestart', e=> e.preventDefault());
