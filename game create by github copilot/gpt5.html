@@ -71,7 +71,7 @@
 
     /* Mobile virtual controls */
     .touch{ position:fixed; inset:0; pointer-events:none; }
-  .stick, .fireBtn{ position:fixed; bottom:calc(24px + env(safe-area-inset-bottom)); width:28vw; max-width:220px; height:28vw; max-height:220px; border-radius:50%; background:#0d1223aa; border:1px solid #223050; pointer-events:auto; }
+  .stick, .fireBtn{ position:fixed; bottom:calc(24px + env(safe-area-inset-bottom)); width:28vw; max-width:220px; height:28vw; max-height:220px; border-radius:50%; background:#0d1223aa; border:1px solid #223050; pointer-events:auto; touch-action:none; -webkit-user-select:none; user-select:none; }
   .stick{ left:calc(24px + env(safe-area-inset-left)); }
   .fireBtn{ right:calc(24px + env(safe-area-inset-right)); display:grid; place-items:center; font-weight:900; color:#ffd9f5; border-color:#572a4d; background:#1a0e1caa; }
     .nub{ position:absolute; left:50%; top:50%; width:38%; height:38%; transform:translate(-50%,-50%); border-radius:50%; background:#132036; border:1px solid #2b3b63; box-shadow: inset 0 0 40px #0008; }
@@ -347,10 +347,10 @@
     window.addEventListener('keydown', e=>{ const a=keymap[e.code]; if(a){ input.keys.set(a,true); if(a==='shoot') input.shoot=true; if(a==='dash') input.dash=true; if(a==='pause'){ e.preventDefault(); togglePause(); }} });
     window.addEventListener('keyup', e=>{ const a=keymap[e.code]; if(a){ input.keys.set(a,false); if(a==='shoot') input.shoot=false; if(a==='dash' && !settings.stickyDash) input.dash=false; }});
 
-    // Mouse
-    gameCanvas.addEventListener('pointerdown', e=>{ gameCanvas.setPointerCapture(e.pointerId); input.mouse.down=true; input.shoot=true; });
-    window.addEventListener('pointerup', ()=>{ input.mouse.down=false; input.shoot=false; });
-    gameCanvas.addEventListener('pointermove', e=>{
+  // Mouse
+  gameCanvas.addEventListener('pointerdown', e=>{ e.preventDefault(); gameCanvas.setPointerCapture(e.pointerId); input.mouse.down=true; input.shoot=true; });
+  window.addEventListener('pointerup', e=>{ e.preventDefault(); input.mouse.down=false; input.shoot=false; });
+  gameCanvas.addEventListener('pointermove', e=>{
       const rect=gameCanvas.getBoundingClientRect();
       input.mouse.x=(e.clientX-rect.left)/rect.width*canvas.width;
       input.mouse.y=(e.clientY-rect.top)/rect.height*canvas.height;
@@ -366,14 +366,17 @@
     let stickId=null; let stickOrigin=null;
     function updateNub(dx,dy,r=1){ const m=Math.hypot(dx,dy); const lim=(stickL.clientWidth*0.38*0.7); const s= m>0? Math.min(m,lim)/m :0; const x=dx*s, y=dy*s; nub.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`; }
 
-    stickL.addEventListener('pointerdown', e=>{ stickId=e.pointerId; stickOrigin={x:e.clientX,y:e.clientY}; input.touch.active=true; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); stickL.setPointerCapture(stickId); });
-    stickL.addEventListener('pointermove', e=>{ if(e.pointerId!==stickId) return; const dx=e.clientX-stickOrigin.x; const dy=e.clientY-stickOrigin.y; input.touch.dx=dx; input.touch.dy=dy; updateNub(dx,dy); });
+  stickL.addEventListener('pointerdown', e=>{ e.preventDefault(); stickId=e.pointerId; stickOrigin={x:e.clientX,y:e.clientY}; input.touch.active=true; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); stickL.setPointerCapture(stickId); });
+  stickL.addEventListener('pointermove', e=>{ if(e.pointerId!==stickId) return; e.preventDefault(); const dx=e.clientX-stickOrigin.x; const dy=e.clientY-stickOrigin.y; input.touch.dx=dx; input.touch.dy=dy; updateNub(dx,dy); });
     const endStick=()=>{ stickId=null; input.touch.active=false; input.touch.dx=0; input.touch.dy=0; updateNub(0,0); };
-    stickL.addEventListener('pointerup', endStick); stickL.addEventListener('pointercancel', endStick); stickL.addEventListener('lostpointercapture', endStick);
+  stickL.addEventListener('pointerup', e=>{ e.preventDefault(); endStick(); }); stickL.addEventListener('pointercancel', endStick); stickL.addEventListener('lostpointercapture', endStick);
 
-    fireBtn.addEventListener('pointerdown', e=>{ fireBtn.setPointerCapture(e.pointerId); input.touch.fire=true; input.shoot=true; });
-    const endFire=()=>{ input.touch.fire=false; input.shoot=false; };
-    fireBtn.addEventListener('pointerup', endFire); fireBtn.addEventListener('pointercancel', endFire); fireBtn.addEventListener('lostpointercapture', endFire);
+  fireBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); fireBtn.setPointerCapture(e.pointerId); input.touch.fire=true; input.shoot=true; });
+  const endFire=()=>{ input.touch.fire=false; input.shoot=false; };
+  fireBtn.addEventListener('pointerup', e=>{ e.preventDefault(); endFire(); }); fireBtn.addEventListener('pointercancel', endFire); fireBtn.addEventListener('lostpointercapture', endFire);
+
+  // Prevent iOS/Android double-tap zoom on buttons
+  document.addEventListener('gesturestart', e=> e.preventDefault());
 
     // Gamepad polling
   let padPauseWas=false;
@@ -400,7 +403,7 @@
     // Resize and DPR
     const canvas=gameCanvas; const ctx=canvas.getContext('2d');
     let needResize=true;
-    function resize(){ const dpr= settings.hires? Math.min(2, window.devicePixelRatio||1) : 1; const w=canvas.clientWidth*dpr|0; const h=canvas.clientHeight*dpr|0; if(canvas.width!==w||canvas.height!==h){ canvas.width=w; canvas.height=h; } ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; needResize=false; }
+  function resize(){ const dpr= settings.hires? Math.min(2, window.devicePixelRatio||1) : 1; const rect=canvas.getBoundingClientRect(); const w=Math.max(1, rect.width*dpr|0); const h=Math.max(1, rect.height*dpr|0); if(canvas.width!==w||canvas.height!==h){ canvas.width=w; canvas.height=h; } ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high'; needResize=false; }
 
     // Game structures
     class Vec{ constructor(x=0,y=0){ this.x=x; this.y=y; } copy(){ return new Vec(this.x,this.y);} set(x,y){ this.x=x; this.y=y; return this;} add(v){ this.x+=v.x; this.y+=v.y; return this;} sub(v){ this.x-=v.x; this.y-=v.y; return this;} scale(s){ this.x*=s; this.y*=s; return this;} len(){ return Math.hypot(this.x,this.y);} norm(){ const l=this.len()||1; this.x/=l; this.y/=l; return this;} }
@@ -571,10 +574,13 @@
       fpsS+=dt; fpsC++; if(fpsS>=0.5){ fps=(fpsC/fpsS)|0; hud.fps.textContent=fps; fpsS=0; fpsC=0; }
       requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+  requestAnimationFrame(frame);
 
     // Initial placement
-    resize(); resetGame(); show(panels.menu);
+  resize(); resetGame(); show(panels.menu);
+  // Resize on orientation and viewport changes
+  window.addEventListener('resize', ()=>{ needResize=true; });
+  window.addEventListener('orientationchange', ()=>{ needResize=true; });
 
     // Keyboard focus helpers for accessibility
     document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ if(!panels.menu.hidden){ hide(panels.menu); } else if(!panels.settings.hidden){ hide(panels.settings);} else if(!panels.help.hidden){ hide(panels.help);} else if(!panels.over.hidden){ hide(panels.over); show(panels.menu);} } });
