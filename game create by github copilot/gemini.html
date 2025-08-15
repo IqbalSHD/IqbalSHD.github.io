@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Odyssey</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap');
+
+        :root {
+            --primary-color: #00ffff;
+            --secondary-color: #ff00ff;
+            --background-color: #00001a;
+            --text-color: #e0e0e0;
+            --container-bg: rgba(0, 10, 30, 0.8);
+            --border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            background-color: var(--background-color);
+            cursor: crosshair;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .ui-panel {
+            position: absolute;
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--border-color);
+        }
+
+        #top-left-panel {
+            top: 20px;
+            left: 20px;
+        }
+
+        #top-right-panel {
+            top: 20px;
+            right: 20px;
+            text-align: right;
+        }
+        
+        #bottom-left-panel {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        #message-log {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.8em;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        h2, h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.2s ease-in-out;
+        }
+        
+        #upgrade-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            display: none;
+            pointer-events: all;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #upgrade-panel button {
+            background-color: var(--container-bg);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 10px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #upgrade-panel button:hover {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+        }
+        
+        #start-screen, #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: all;
+        }
+
+        #start-screen h1, #game-over-screen h1 {
+            font-size: 4em;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px var(--primary-color);
+        }
+        
+        #start-screen p, #game-over-screen p {
+            font-size: 1.2em;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .start-button, .restart-button {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-family: 'Orbitron', sans-serif;
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-button:hover, .restart-button:hover {
+            background: var(--primary-color);
+            color: var(--background-color);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-container">
+            <div id="top-left-panel" class="ui-panel">
+                <h3>SHIELD</h3>
+                <div class="progress-bar">
+                    <div id="shield-bar" class="progress-fill"></div>
+                </div>
+                <h3>ENERGY</h3>
+                <div class="progress-bar">
+                    <div id="energy-bar" class="progress-fill"></div>
+                </div>
+            </div>
+            <div id="top-right-panel" class="ui-panel">
+                <h3>RESOURCES</h3>
+                <div id="resources-display">CRYSTALS: 0</div>
+                <h3>SCORE</h3>
+                <div id="score-display">0</div>
+            </div>
+            <div id="bottom-left-panel" class="ui-panel">
+                <h3>LOG</h3>
+                <div id="message-log"></div>
+            </div>
+            <div id="upgrade-panel" class="ui-panel">
+                <h3>SHIP UPGRADES</h3>
+                <button id="upgrade-shield">Upgrade Shield (Cost: 50)</button>
+                <button id="upgrade-weapon">Upgrade Weapon (Cost: 50)</button>
+                <button id="upgrade-engine">Upgrade Engine (Cost: 50)</button>
+                <button id="close-upgrades">Close</button>
+            </div>
+        </div>
+        <div id="start-screen">
+            <h1>COSMIC ODYSSEY</h1>
+            <p>You are a lone explorer in a vast, uncharted galaxy. Your mission: survive, gather resources, and become the master of the cosmos. Use W/A/S/D or Arrow Keys to move, and click to shoot. Press 'U' to open the upgrade panel.</p>
+            <button class="start-button">Begin Your Journey</button>
+        </div>
+        <div id="game-over-screen" style="display: none;">
+            <h1>GAME OVER</h1>
+            <p id="final-score"></p>
+            <button class="restart-button">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // UI Elements
+        const shieldBar = document.getElementById('shield-bar');
+        const energyBar = document.getElementById('energy-bar');
+        const resourcesDisplay = document.getElementById('resources-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const messageLog = document.getElementById('message-log');
+        const upgradePanel = document.getElementById('upgrade-panel');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+
+        let gameRunning = false;
+
+        let player, camera, keys, projectiles, particles, asteroids, enemies, floatingTexts;
+        let score, resources;
+        let worldSize = 5000;
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            player = {
+                x: worldSize / 2,
+                y: worldSize / 2,
+                size: 20,
+                angle: 0,
+                speed: 0,
+                maxSpeed: 3,
+                acceleration: 0.1,
+                friction: 0.98,
+                turnSpeed: 0.05,
+                shield: 100,
+                maxShield: 100,
+                energy: 100,
+                maxEnergy: 100,
+                weaponLevel: 1,
+                engineLevel: 1,
+                shieldLevel: 1,
+                isThrusting: false,
+                lastShot: 0,
+                shootCooldown: 250,
+            };
+
+            camera = {
+                x: player.x,
+                y: player.y,
+                zoom: 1,
+            };
+
+            keys = {
+                w: false, a: false, d: false, u: false,
+                ArrowUp: false, ArrowLeft: false, ArrowRight: false
+            };
+            
+            projectiles = [];
+            particles = [];
+            asteroids = [];
+            enemies = [];
+            floatingTexts = [];
+            
+            score = 0;
+            resources = 0;
+
+            generateWorld();
+            updateUI();
+            logMessage("Welcome to Cosmic Odyssey. Your journey begins.");
+        }
+
+        function generateWorld() {
+            for (let i = 0; i < 500; i++) {
+                asteroids.push({
+                    x: Math.random() * worldSize,
+                    y: Math.random() * worldSize,
+                    size: Math.random() * 30 + 15,
+                    angle: Math.random() * Math.PI * 2,
+                    speed: Math.random() * 0.5,
+                    resources: Math.floor(Math.random() * 10 + 5)
+                });
+            }
+            for (let i = 0; i < 20; i++) {
+                spawnEnemy();
+            }
+        }
+        
+        function spawnEnemy() {
+            enemies.push({
+                x: Math.random() * worldSize,
+                y: Math.random() * worldSize,
+                size: 25,
+                angle: 0,
+                speed: 0,
+                maxSpeed: 2,
+                shield: 30,
+                lastShot: Date.now(),
+                shootCooldown: 2000,
+                targetAngle: 0,
+                state: 'idle', // idle, seeking, attacking
+                idleTimer: 0,
+            });
+        }
+
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+            
+            update(timestamp);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update(timestamp) {
+            handlePlayerMovement(timestamp);
+            updateProjectiles(timestamp);
+            updateParticles(timestamp);
+            updateAsteroids(timestamp);
+            updateEnemies(timestamp);
+            updateFloatingTexts(timestamp);
+            
+            camera.x += (player.x - camera.x) * 0.1;
+            camera.y += (player.y - camera.y) * 0.1;
+
+            // Regenerate energy
+            if (player.energy < player.maxEnergy) {
+                player.energy += 0.1;
+            }
+            
+            if (player.shield <= 0) {
+                endGame();
+            }
+
+            updateUI();
+        }
+
+        function handlePlayerMovement(timestamp) {
+            if (keys.a || keys.ArrowLeft) player.angle -= player.turnSpeed;
+            if (keys.d || keys.ArrowRight) player.angle += player.turnSpeed;
+
+            player.isThrusting = false;
+            if (keys.w || keys.ArrowUp) {
+                let newSpeed = player.speed + player.acceleration;
+                if (newSpeed > player.maxSpeed) newSpeed = player.maxSpeed;
+                player.speed = newSpeed;
+                player.isThrusting = true;
+                
+                // Create thruster particles
+                for (let i = 0; i < 2; i++) {
+                    particles.push({
+                        x: player.x - Math.cos(player.angle) * player.size,
+                        y: player.y - Math.sin(player.angle) * player.size,
+                        vx: -Math.cos(player.angle) * 2 + (Math.random() - 0.5),
+                        vy: -Math.sin(player.angle) * 2 + (Math.random() - 0.5),
+                        life: 30,
+                        color: 'orange'
+                    });
+                }
+            }
+
+            player.x += Math.cos(player.angle) * player.speed;
+            player.y += Math.sin(player.angle) * player.speed;
+            player.speed *= player.friction;
+
+            // World boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x > worldSize) player.x = worldSize;
+            if (player.y < 0) player.y = 0;
+            if (player.y > worldSize) player.y = worldSize;
+        }
+
+        function shoot(x, y, angle, owner) {
+            let speed = 10;
+            let damage = 10;
+            let color = 'cyan';
+            if (owner === 'player') {
+                if (player.energy < 5) return;
+                player.energy -= 5;
+                damage = 10 + (player.weaponLevel - 1) * 5;
+            } else {
+                color = 'red';
+            }
+
+            projectiles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 60,
+                owner,
+                damage,
+                color
+            });
+        }
+
+        function updateProjectiles() {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p = projectiles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+
+                if (p.life <= 0) {
+                    projectiles.splice(i, 1);
+                    continue;
+                }
+
+                // Collision detection
+                if (p.owner === 'player') {
+                    for (let j = asteroids.length - 1; j >= 0; j--) {
+                        let a = asteroids[j];
+                        if (dist(p.x, p.y, a.x, a.y) < a.size) {
+                            hitAsteroid(a, p.damage);
+                            projectiles.splice(i, 1);
+                            break;
+                        }
+                    }
+                    for (let j = enemies.length - 1; j >= 0; j--) {
+                        let e = enemies[j];
+                        if (dist(p.x, p.y, e.x, e.y) < e.size) {
+                            hitEnemy(e, p.damage);
+                            projectiles.splice(i, 1);
+                            break;
+                        }
+                    }
+                } else { // Enemy projectile
+                    if (dist(p.x, p.y, player.x, player.y) < player.size) {
+                        hitPlayer(p.damage);
+                        projectiles.splice(i, 1);
+                    }
+                }
+            }
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateAsteroids() {
+            for (let a of asteroids) {
+                a.x += Math.cos(a.angle) * a.speed;
+                a.y += Math.sin(a.angle) * a.speed;
+
+                if (a.x < 0 || a.x > worldSize || a.y < 0 || a.y > worldSize) {
+                    a.angle += Math.PI; // Bounce off walls
+                }
+            }
+        }
+        
+        function updateEnemies(timestamp) {
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i];
+                let distanceToPlayer = dist(e.x, e.y, player.x, player.y);
+
+                // State machine
+                switch(e.state) {
+                    case 'idle':
+                        if (distanceToPlayer < 500) {
+                            e.state = 'seeking';
+                        }
+                        e.idleTimer--;
+                        if (e.idleTimer <= 0) {
+                            e.targetAngle = Math.random() * Math.PI * 2;
+                            e.idleTimer = Math.random() * 200 + 100;
+                        }
+                        e.angle += (e.targetAngle - e.angle) * 0.01;
+                        e.speed *= 0.95;
+                        break;
+                    case 'seeking':
+                        if (distanceToPlayer > 600) {
+                            e.state = 'idle';
+                        } else if (distanceToPlayer < 300) {
+                            e.state = 'attacking';
+                        }
+                        e.targetAngle = Math.atan2(player.y - e.y, player.x - e.x);
+                        e.angle = turnTowards(e.angle, e.targetAngle, 0.03);
+                        e.speed += (e.maxSpeed - e.speed) * 0.05;
+                        break;
+                    case 'attacking':
+                        if (distanceToPlayer > 350) {
+                            e.state = 'seeking';
+                        }
+                        e.targetAngle = Math.atan2(player.y - e.y, player.x - e.x);
+                        e.angle = turnTowards(e.angle, e.targetAngle, 0.05);
+                        e.speed *= 0.9; // Slow down to attack
+                        
+                        if (timestamp - e.lastShot > e.shootCooldown) {
+                            shoot(e.x, e.y, e.angle, 'enemy');
+                            e.lastShot = timestamp;
+                        }
+                        break;
+                }
+
+                e.x += Math.cos(e.angle) * e.speed;
+                e.y += Math.sin(e.angle) * e.speed;
+            }
+        }
+        
+        function updateFloatingTexts() {
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                let ft = floatingTexts[i];
+                ft.y -= 0.5;
+                ft.life--;
+                if (ft.life <= 0) {
+                    floatingTexts.splice(i, 1);
+                }
+            }
+        }
+
+        function hitAsteroid(asteroid, damage) {
+            createExplosion(asteroid.x, asteroid.y, 'gray', 10);
+            resources += 1;
+            score += 10;
+            floatingTexts.push({x: asteroid.x, y: asteroid.y, text: "+1 Crystal", life: 60, color: 'yellow'});
+            
+            // Find and remove the asteroid
+            const index = asteroids.indexOf(asteroid);
+            if (index > -1) {
+                asteroids.splice(index, 1);
+            }
+        }
+        
+        function hitEnemy(enemy, damage) {
+            enemy.shield -= damage;
+            createExplosion(enemy.x, enemy.y, 'orange', 5);
+            if (enemy.shield <= 0) {
+                destroyEnemy(enemy);
+            }
+        }
+        
+        function destroyEnemy(enemy) {
+            createExplosion(enemy.x, enemy.y, 'red', 30);
+            score += 100;
+            resources += 25;
+            logMessage("Enemy destroyed. Gained 25 crystals.");
+            floatingTexts.push({x: enemy.x, y: enemy.y, text: "+100", life: 60, color: 'white'});
+            floatingTexts.push({x: enemy.x, y: enemy.y + 20, text: "+25 Crystals", life: 60, color: 'yellow'});
+            
+            const index = enemies.indexOf(enemy);
+            if (index > -1) {
+                enemies.splice(index, 1);
+            }
+            // Spawn a new one to keep the world populated
+            setTimeout(spawnEnemy, 5000);
+        }
+
+        function hitPlayer(damage) {
+            player.shield -= damage;
+            createExplosion(player.x, player.y, 'lightblue', 15);
+            if (player.shield < 0) player.shield = 0;
+            logMessage(`Shield hit! Remaining: ${Math.round(player.shield)}%`, 'red');
+        }
+
+        function createExplosion(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5,
+                    life: Math.random() * 40 + 20,
+                    color
+                });
+            }
+        }
+
+        function draw() {
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Center camera on player
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-camera.x, -camera.y);
+
+            drawStars();
+            drawAsteroids();
+            drawProjectiles();
+            drawParticles();
+            drawEnemies();
+            drawPlayer();
+            drawFloatingTexts();
+
+            ctx.restore();
+            
+            drawMinimap();
+        }
+
+        function drawStars() {
+            ctx.fillStyle = 'white';
+            for (let i = 0; i < 1000; i++) {
+                // Use a seeded random to keep stars static
+                let x = (Math.sin(i) * 12345) % worldSize;
+                let y = (Math.cos(i) * 54321) % worldSize;
+                if (x < 0) x += worldSize;
+                if (y < 0) y += worldSize;
+                ctx.fillRect(x, y, 2, 2);
+            }
+        }
+
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.angle);
+            
+            // Ship body
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.moveTo(player.size, 0);
+            ctx.lineTo(-player.size / 2, -player.size / 2);
+            ctx.lineTo(-player.size / 2, player.size / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Cockpit
+            ctx.fillStyle = '#00ffff';
+            ctx.beginPath();
+            ctx.arc(player.size / 2, 0, player.size / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (player.isThrusting) {
+                ctx.fillStyle = 'orange';
+                ctx.beginPath();
+                ctx.moveTo(-player.size / 2, 0);
+                ctx.lineTo(-player.size, Math.random() * 5 - 2.5);
+                ctx.lineTo(-player.size / 2, 0);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function drawProjectiles() {
+            for (let p of projectiles) {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawParticles() {
+            for (let p of particles) {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / 40;
+                ctx.fillRect(p.x, p.y, 2, 2);
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function drawAsteroids() {
+            ctx.strokeStyle = 'gray';
+            ctx.lineWidth = 2;
+            for (let a of asteroids) {
+                ctx.beginPath();
+                ctx.moveTo(a.x + a.size, a.y);
+                for (let i = 1; i <= 8; i++) {
+                    let angle = (i / 8) * Math.PI * 2;
+                    let radius = a.size + (Math.sin(i * 5) * a.size * 0.2);
+                    ctx.lineTo(a.x + Math.cos(angle) * radius, a.y + Math.sin(angle) * radius);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+        
+        function drawEnemies() {
+            for (let e of enemies) {
+                ctx.save();
+                ctx.translate(e.x, e.y);
+                ctx.rotate(e.angle);
+                
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.moveTo(e.size, 0);
+                ctx.lineTo(-e.size, -e.size / 3);
+                ctx.lineTo(-e.size, e.size / 3);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        function drawFloatingTexts() {
+            for (let ft of floatingTexts) {
+                ctx.fillStyle = ft.color;
+                ctx.font = "16px Orbitron";
+                ctx.globalAlpha = ft.life / 60;
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function drawMinimap() {
+            const mapSize = 150;
+            const mapX = canvas.width - mapSize - 20;
+            const mapY = canvas.height - mapSize - 20;
+            const scale = mapSize / worldSize;
+
+            ctx.fillStyle = 'rgba(0, 10, 30, 0.8)';
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.fillRect(mapX, mapY, mapSize, mapSize);
+            ctx.strokeRect(mapX, mapY, mapSize, mapSize);
+
+            // Player
+            ctx.fillStyle = 'cyan';
+            ctx.fillRect(mapX + player.x * scale - 2, mapY + player.y * scale - 2, 4, 4);
+
+            // Enemies
+            ctx.fillStyle = 'red';
+            for (let e of enemies) {
+                ctx.fillRect(mapX + e.x * scale - 1, mapY + e.y * scale - 1, 2, 2);
+            }
+        }
+
+        function updateUI() {
+            shieldBar.style.width = `${(player.shield / player.maxShield) * 100}%`;
+            energyBar.style.width = `${(player.energy / player.maxEnergy) * 100}%`;
+            resourcesDisplay.textContent = `CRYSTALS: ${resources}`;
+            scoreDisplay.textContent = score;
+        }
+        
+        function logMessage(message, color = '#e0e0e0') {
+            const p = document.createElement('p');
+            p.textContent = `> ${message}`;
+            p.style.color = color;
+            messageLog.appendChild(p);
+            messageLog.scrollTop = messageLog.scrollHeight;
+        }
+        
+        function toggleUpgradePanel() {
+            if (upgradePanel.style.display === 'none' || upgradePanel.style.display === '') {
+                upgradePanel.style.display = 'flex';
+                updateUpgradeCosts();
+            } else {
+                upgradePanel.style.display = 'none';
+            }
+        }
+        
+        function updateUpgradeCosts() {
+            document.getElementById('upgrade-shield').textContent = `Upgrade Shield (Cost: ${50 * player.shieldLevel})`;
+            document.getElementById('upgrade-weapon').textContent = `Upgrade Weapon (Cost: ${50 * player.weaponLevel})`;
+            document.getElementById('upgrade-engine').textContent = `Upgrade Engine (Cost: ${50 * player.engineLevel})`;
+        }
+
+        function dist(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+        
+        function turnTowards(currentAngle, targetAngle, turnSpeed) {
+            let diff = targetAngle - currentAngle;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            
+            if (Math.abs(diff) < turnSpeed) {
+                return targetAngle;
+            }
+            return currentAngle + Math.sign(diff) * turnSpeed;
+        }
+        
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            gameRunning = true;
+            init();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function endGame() {
+            gameRunning = false;
+            gameOverScreen.style.display = 'flex';
+            document.getElementById('final-score').textContent = `Your final score is ${score}`;
+        }
+
+        // Event Listeners
+        window.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+            if (e.key.toLowerCase() === 'u') toggleUpgradePanel();
+        });
+        window.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+        });
+        window.addEventListener('mousedown', (e) => {
+            if (!gameRunning || (upgradePanel.style.display !== 'none' && upgradePanel.style.display !== '')) return;
+            
+            if (Date.now() - player.lastShot > player.shootCooldown) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                const worldMouseX = (mouseX - canvas.width / 2) / camera.zoom + camera.x;
+                const worldMouseY = (mouseY - canvas.height / 2) / camera.zoom + camera.y;
+                
+                const angle = Math.atan2(worldMouseY - player.y, worldMouseX - player.x);
+                shoot(player.x, player.y, angle, 'player');
+                player.lastShot = Date.now();
+            }
+        });
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        document.querySelector('.start-button').addEventListener('click', startGame);
+        document.querySelector('.restart-button').addEventListener('click', startGame);
+        
+        document.getElementById('close-upgrades').addEventListener('click', toggleUpgradePanel);
+        
+        document.getElementById('upgrade-shield').addEventListener('click', () => {
+            const cost = 50 * player.shieldLevel;
+            if (resources >= cost) {
+                resources -= cost;
+                player.shieldLevel++;
+                player.maxShield += 50;
+                player.shield = player.maxShield;
+                logMessage("Shields upgraded!", 'cyan');
+                updateUpgradeCosts();
+            } else {
+                logMessage("Not enough crystals.", 'red');
+            }
+        });
+        
+        document.getElementById('upgrade-weapon').addEventListener('click', () => {
+            const cost = 50 * player.weaponLevel;
+            if (resources >= cost) {
+                resources -= cost;
+                player.weaponLevel++;
+                player.shootCooldown = Math.max(100, player.shootCooldown - 25);
+                logMessage("Weapon systems enhanced!", 'cyan');
+                updateUpgradeCosts();
+            } else {
+                logMessage("Not enough crystals.", 'red');
+            }
+        });
+        
+        document.getElementById('upgrade-engine').addEventListener('click', () => {
+            const cost = 50 * player.engineLevel;
+            if (resources >= cost) {
+                resources -= cost;
+                player.engineLevel++;
+                player.maxSpeed += 0.5;
+                player.turnSpeed += 0.005;
+                logMessage("Engine performance boosted!", 'cyan');
+                updateUpgradeCosts();
+            } else {
+                logMessage("Not enough crystals.", 'red');
+            }
+        });
+
+    </script>
+</body>
+</html>
