@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quantum Nexus Adventure - The Ultimate Web Game</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
@@ -86,6 +86,18 @@
             height: 100vh;
             position: relative;
             display: none;
+        }
+        
+        .game-canvas {
+            display: block;
+            background: transparent;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                padding-bottom: 150px;
+                box-sizing: border-box;
+            }
         }
         
         .hud {
@@ -516,9 +528,10 @@
         /* Mobile Touch Controls */
         .mobile-controls {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
             z-index: 200;
             display: none;
             pointer-events: none;
@@ -526,12 +539,12 @@
         
         .touch-joystick {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 120px;
-            height: 120px;
-            background: rgba(0, 255, 255, 0.1);
-            border: 3px solid rgba(0, 255, 255, 0.3);
+            bottom: 30px;
+            left: 30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 255, 255, 0.2);
+            border: 3px solid rgba(0, 255, 255, 0.5);
             border-radius: 50%;
             pointer-events: all;
             touch-action: none;
@@ -541,24 +554,23 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 255, 255, 0.8);
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 255, 255, 0.9);
             border: 2px solid #00ffff;
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            transition: all 0.1s ease;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
         }
         
         .fire-button {
             position: absolute;
-            bottom: 40px;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 0, 0, 0.2);
-            border: 3px solid rgba(255, 0, 0, 0.5);
+            bottom: 30px;
+            right: 30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 3px solid rgba(255, 0, 0, 0.7);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -566,15 +578,16 @@
             font-family: 'Orbitron', monospace;
             font-weight: bold;
             color: #ff0000;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             pointer-events: all;
             touch-action: manipulation;
             user-select: none;
         }
         
         .fire-button:active {
-            background: rgba(255, 0, 0, 0.4);
-            transform: scale(0.95);
+            background: rgba(255, 0, 0, 0.5);
+            transform: scale(0.9);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
         }
         
         @media (max-width: 768px) {
@@ -584,6 +597,44 @@
             .controls-hint {
                 display: none;
             }
+        }
+        
+        /* Smaller mobile screens */
+        @media (max-width: 480px) {
+            .touch-joystick {
+                width: 80px;
+                height: 80px;
+                bottom: 20px;
+                left: 20px;
+            }
+            
+            .joystick-handle {
+                width: 25px;
+                height: 25px;
+            }
+            
+            .fire-button {
+                width: 80px;
+                height: 80px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 0.7rem;
+            }
+            
+            .hud-panel {
+                min-width: 80px;
+                padding: 4px;
+                font-size: 0.6rem;
+            }
+            
+            .hud-title {
+                font-size: 0.7rem;
+            }
+            
+            .quantum-logo {
+                font-size: 1.5rem;
+            }
+        }
         
         @keyframes waveAnnounce {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
@@ -592,39 +643,55 @@
         }
         
         @media (max-width: 768px) {
-            .quantum-logo { font-size: 2.5rem; }
+            .quantum-logo { font-size: 2rem; }
             .hud { 
                 flex-direction: row;
                 gap: 5px;
                 top: 5px;
                 left: 5px;
                 right: 5px;
+                flex-wrap: wrap;
             }
             .hud-panel { 
-                min-width: 120px;
-                padding: 8px;
+                min-width: 100px;
+                padding: 6px;
+                font-size: 0.7rem;
+                flex: 1;
+            }
+            .hud-title {
                 font-size: 0.8rem;
+                margin-bottom: 3px;
+            }
+            .stat-bar {
+                font-size: 0.7rem;
+                margin: 1px 0;
             }
             .controls-hint { 
-                font-size: 1rem;
                 display: none;
             }
-            .game-over-title { font-size: 2.5rem; }
+            .game-over-title { font-size: 2rem; }
             .wave-indicator {
-                font-size: 1.5rem;
-                padding: 10px 20px;
+                font-size: 1.2rem;
+                padding: 8px 15px;
             }
             .boss-health-container {
-                left: 10px;
-                right: 10px;
-                top: 80px;
+                left: 5px;
+                right: 5px;
+                top: 60px;
             }
             .loading-screen {
-                padding: 20px;
+                padding: 15px;
             }
             .game-over {
-                padding: 20px;
-                margin: 10px;
+                padding: 15px;
+                margin: 5px;
+            }
+            .final-stats {
+                font-size: 0.9rem;
+            }
+            .restart-btn {
+                font-size: 0.9rem;
+                padding: 10px 20px;
             }
         }
     </style>
@@ -749,8 +816,10 @@
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
+            // Adjust canvas size for mobile controls
+            const isMobile = window.innerWidth <= 768;
             canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.height = isMobile ? window.innerHeight - 150 : window.innerHeight;
             
             // Keep player in bounds on resize
             if (gameState.player) {
@@ -1563,37 +1632,39 @@
             const handle = document.getElementById('joystickHandle');
             const fireButton = document.getElementById('fireButton');
             
+            if (!joystick || !handle || !fireButton) return;
+            
             let joystickActive = false;
-            let joystickStartPos = { x: 0, y: 0 };
-            let joystickCenter = { x: 0, y: 0 };
+            let fireActive = false;
             
             // Get joystick center position
             function updateJoystickCenter() {
                 const rect = joystick.getBoundingClientRect();
-                joystickCenter.x = rect.left + rect.width / 2;
-                joystickCenter.y = rect.top + rect.height / 2;
+                return {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
             }
             
             // Joystick touch events
             joystick.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 joystickActive = true;
-                updateJoystickCenter();
-                const touch = e.touches[0];
-                joystickStartPos.x = touch.clientX;
-                joystickStartPos.y = touch.clientY;
             });
             
             joystick.addEventListener('touchmove', (e) => {
                 if (!joystickActive) return;
                 e.preventDefault();
+                e.stopPropagation();
                 
                 const touch = e.touches[0];
-                const deltaX = touch.clientX - joystickCenter.x;
-                const deltaY = touch.clientY - joystickCenter.y;
+                const center = updateJoystickCenter();
+                const deltaX = touch.clientX - center.x;
+                const deltaY = touch.clientY - center.y;
                 
                 // Limit movement to joystick radius
-                const maxDistance = 40;
+                const maxDistance = 35;
                 const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                 
                 let moveX = deltaX;
@@ -1608,10 +1679,6 @@
                 // Update handle position
                 handle.style.transform = `translate(-50%, -50%) translate(${moveX}px, ${moveY}px)`;
                 
-                // Update player movement
-                const sensitivity = 0.1;
-                const moveSpeed = gameState.player.speed;
-                
                 // Reset movement keys
                 gameState.keys['w'] = false;
                 gameState.keys['s'] = false;
@@ -1619,11 +1686,12 @@
                 gameState.keys['d'] = false;
                 
                 // Set movement based on joystick position
-                if (Math.abs(moveY) > 10) {
+                const threshold = 8;
+                if (Math.abs(moveY) > threshold) {
                     if (moveY < 0) gameState.keys['w'] = true;
                     if (moveY > 0) gameState.keys['s'] = true;
                 }
-                if (Math.abs(moveX) > 10) {
+                if (Math.abs(moveX) > threshold) {
                     if (moveX < 0) gameState.keys['a'] = true;
                     if (moveX > 0) gameState.keys['d'] = true;
                 }
@@ -1631,6 +1699,7 @@
             
             joystick.addEventListener('touchend', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 joystickActive = false;
                 handle.style.transform = 'translate(-50%, -50%)';
                 
@@ -1644,17 +1713,34 @@
             // Fire button events
             fireButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                fireActive = true;
                 gameState.keys[' '] = true;
+                fireButton.style.background = 'rgba(255, 0, 0, 0.6)';
             });
             
             fireButton.addEventListener('touchend', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                fireActive = false;
                 gameState.keys[' '] = false;
+                fireButton.style.background = 'rgba(255, 0, 0, 0.3)';
             });
             
-            // Update joystick center on resize
-            window.addEventListener('resize', updateJoystickCenter);
-            updateJoystickCenter();
+            fireButton.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                fireActive = false;
+                gameState.keys[' '] = false;
+                fireButton.style.background = 'rgba(255, 0, 0, 0.3)';
+            });
+            
+            // Handle multiple touches
+            document.addEventListener('touchstart', (e) => {
+                // Allow multiple touches for joystick and fire button
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            });
         }
 
         function initGame() {
