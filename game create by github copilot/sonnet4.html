@@ -598,7 +598,7 @@
             powerups: [],
             boss: null,
             score: 0,
-            wave: 1,
+            wave: 0,
             level: 1,
             xp: 0,
             xpToNext: 100,
@@ -825,6 +825,7 @@
                 moveTimer: 0
             };
             document.getElementById('bossHealthContainer').style.display = 'block';
+            showAchievement(`BOSS WAVE ${gameState.wave}!`);
         }
 
         function updateBoss() {
@@ -921,6 +922,8 @@
                 for (let i = 0; i < 5; i++) {
                     spawnPowerup(boss.x + Math.random() * 120, boss.y + Math.random() * 120);
                 }
+                
+                // Boss wave is complete - the next wave will be triggered in the main game loop
             }
         }
 
@@ -1302,26 +1305,30 @@
             }
             
             // Wave management
-            const enemiesNeeded = 5 + gameState.wave * 2;
             if (gameState.enemies.length === 0 && !gameState.boss) {
+                // Move to next wave
+                gameState.wave++;
+                showWaveIndicator(gameState.wave);
+                
+                // Check if this is a boss wave (every 5th wave)
                 if (gameState.wave % 5 === 0) {
                     // Boss wave
                     spawnBoss();
                 } else {
-                    // Next wave
-                    gameState.wave++;
-                    showWaveIndicator(gameState.wave);
-                    
-                    // Spawn enemies for new wave
+                    // Regular wave - spawn enemies
+                    const enemiesNeeded = 5 + gameState.wave * 2;
                     for (let i = 0; i < enemiesNeeded; i++) {
                         setTimeout(() => spawnEnemy(), i * 500);
                     }
                 }
             }
             
-            // Spawn enemies during wave
-            if (Math.random() < 0.02 && gameState.enemies.length < enemiesNeeded && !gameState.boss) {
-                spawnEnemy();
+            // Spawn enemies during wave (but not during boss fights)
+            if (!gameState.boss) {
+                const enemiesNeeded = 5 + gameState.wave * 2;
+                if (Math.random() < 0.02 && gameState.enemies.length < enemiesNeeded) {
+                    spawnEnemy();
+                }
             }
             
             // Random powerup spawning
@@ -1436,6 +1443,14 @@
             
             // Prevent context menu
             canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            
+            // Start first wave
+            gameState.wave = 1;
+            showWaveIndicator(gameState.wave);
+            const initialEnemies = 5 + gameState.wave * 2; // 7 enemies for wave 1
+            for (let i = 0; i < initialEnemies; i++) {
+                setTimeout(() => spawnEnemy(), i * 500);
+            }
             
             // Start game
             updateHUD();
